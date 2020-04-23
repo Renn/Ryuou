@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-  package="org.ecnu.mobiledev.ryuou">
+  package="org.ecnu.ryuou">
 
   <application
+    android:name="org.ecnu.ryuou.MainApplication"
     android:allowBackup="true"
     android:icon="@mipmap/ic_launcher"
     android:label="@string/app_name"

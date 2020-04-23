@@ -1,3 +1,8 @@
 <resources>
   <string name="app_name">Ryuou</string>
+  <string name="channel_name">通知渠道</string>
+  <string name="channel_description">通知渠道描述</string>
+  <string name="notifications">通知</string>
+  <string name="sound">声音</string>
+  <string name="vibrate">震动</string>
 </resources>

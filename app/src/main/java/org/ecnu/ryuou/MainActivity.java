@@ -1,10 +1,9 @@
-package org.ecnu.mobiledev.ryuou;
+package org.ecnu.ryuou;
 
 import android.os.Bundle;
 import android.widget.TextView;
-import androidx.appcompat.app.AppCompatActivity;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
 
   // Used to load the 'native-lib' library on application startup.
   static {

@@ -1,4 +1,4 @@
-package org.ecnu.mobiledev.ryuou;
+package org.ecnu.ryuou;
 
 import static org.junit.Assert.assertEquals;
 
