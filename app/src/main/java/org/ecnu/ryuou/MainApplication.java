@@ -1,12 +1,10 @@
 package org.ecnu.ryuou;
-
 import android.app.Application;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
-
 public class MainApplication extends Application {
 
   public static final String NOTIFICATION_CHANNEL_ID = "default";

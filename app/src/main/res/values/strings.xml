@@ -1,8 +1,30 @@
 <resources>
-  <string name="app_name">Ryuou</string>
-  <string name="channel_name">通知渠道</string>
-  <string name="channel_description">通知渠道描述</string>
-  <string name="notifications">通知</string>
-  <string name="sound">声音</string>
-  <string name="vibrate">震动</string>
+    <string name="app_name">Ryuou</string>
+    <string name="channel_name">通知渠道</string>
+    <string name="channel_description">通知渠道描述</string>
+    <string name="notifications">通知</string>
+    <string name="sound">声音</string>
+    <string name="vibrate">震动</string>
+    <string name="帮助">帮助</string>
+    <string name="action_settings">action_settings</string>
+    <string name="新建文件">新建文件</string>
+    <string name="打开文件">打开文件</string>
+    <string name="保存文件">保存文件</string>
+    <string name="加载文件">加载文件</string>
+    <string name="用户菜单">用户菜单</string>
+    <string name="龙王播放器">龙王播放器</string>
+    <string name="关于龙王播放器">关于龙王播放器</string>
+    <string name="支持">支持</string>
+    <string name="支持内容">内容</string>
+    <string name="简介">简介</string>
+    <string name="简介内容">简介内容</string>
+    <string name="鸣谢">鸣谢</string>
+    <string name="鸣谢内容">鸣谢内容</string>
+    <string name="textview">播放器界面</string>
+    <string name="textview2">解码器页面</string>
+    <string name="音频页面">TextView</string>
+    <string name="音频界面">音频界面</string>
+    <string name="字幕界面">字幕界面</string>
+    <string name="开发界面">开发界面</string>
+    <string name="常规界面">常规界面</string>
 </resources>
