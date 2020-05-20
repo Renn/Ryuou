@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+<!--    <group-->
+<!--        android:id="@+id/group1"-->
+<!--        android:checkableBehavior="single">-->
+<!--        <item-->
+<!--            android:id="@+id/single_1"-->
+<!--            android:icon="@drawable/ic_android_fill"-->
+<!--            android:title="视频"-->
+<!--            app:actionLayout="@layout/bage_hint"/>-->
+
+<!--        <item-->
+<!--            android:id="@+id/single_2"-->
+<!--            android:icon="@drawable/ic_apple_fill"-->
+<!--            android:title="音频"/>-->
+<!--    </group>-->
+
+<!--    <group-->
+<!--        android:id="@+id/group2"-->
+<!--        android:checkableBehavior="single">-->
+<!--        <item-->
+<!--            android:id="@+id/single_3"-->
+<!--            android:icon="@drawable/ic_github_line"-->
+<!--            android:title="最近添加"/>-->
+
+<!--        <item-->
+<!--            android:id="@+id/single_4"-->
+<!--            android:icon="@drawable/ic_wechat_fill"-->
+<!--            android:title="历史记录"/>-->
+<!--    </group>-->
+
+
+    <item
+        android:title="文档">
+        <menu>
+            <item
+                android:id="@+id/item_400"
+                android:icon="@drawable/liebiao"
+                android:title="搜索"/>
+            <item
+                android:id="@+id/item_200"
+                android:icon="@drawable/shipin_1"
+                android:title="视频"/>
+
+            <item
+                android:id="@+id/item_100"
+                android:icon="@drawable/yinpin"
+                android:title="音频"/>
+
+            <item
+                android:id="@+id/item_300"
+                android:icon="@drawable/tupian"
+                android:title="图片"/>
+        </menu>
+    </item>
+
+    <item
+        android:title="列表">
+        <menu>
+            <item
+                android:id="@+id/item_2"
+                android:icon="@drawable/tianjia"
+                android:title="最近添加"/>
+
+            <item
+                android:id="@+id/item_1"
+                android:icon="@drawable/bofangliebiao"
+                android:title="播放列表"/>
+
+            <item
+                android:id="@+id/item_3"
+                android:icon="@drawable/lishishuju"
+                android:title="历史记录"/>
+        </menu>
+    </item>
+
+    <item
+        android:title="碎片">
+        <menu>
+            <item
+                android:id="@+id/item_20"
+                android:icon="@drawable/shipin"
+                android:title="截取片段"/>
+
+            <item
+                android:id="@+id/item_10"
+                android:icon="@drawable/yinle"
+                android:title="截取音频"/>
+            <item
+                android:id="@+id/item_30"
+                android:icon="@drawable/jiandao"
+                android:title="截图"/>
+
+        </menu>
+    </item>
+
+</menu>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="60dp">
+
+    <ImageView
+        android:id="@+id/iv_icon"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_marginLeft="13dp"
+        android:src="@drawable/yinpin" />
+ <LinearLayout
+     android:layout_marginLeft="3dp"
+     android:layout_centerVertical="true"
+     android:layout_toRightOf="@id/iv_icon"
+     android:layout_width="wrap_content"
+     android:gravity="center_vertical"
+     android:layout_height="wrap_content"
+     android:orientation="vertical"
+     >
+
+     <TextView
+         android:textSize="18sp"
+         android:textColor="@color/colorLong"
+         android:layout_width="wrap_content"
+         android:id="@+id/tv_name"
+         android:text="名称"
+         android:layout_height="wrap_content"/>
+
+     <TextView
+         android:textSize="16sp"
+         android:layout_marginLeft="5dp"
+         android:textColor="@color/colorLong"
+         android:layout_width="wrap_content"
+         android:id="@+id/tv_time"
+         android:text="20：00"
+         android:layout_height="wrap_content"/>
+
+ </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="13dp"
+        android:text="20mb"
+        android:textColor="@color/colorLong"
+        android:textSize="16sp" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:background="#440000"
+        android:layout_alignParentBottom="true"
+        />
+</RelativeLayout>
