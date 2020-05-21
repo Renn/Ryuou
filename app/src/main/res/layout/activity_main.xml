@@ -25,8 +25,26 @@
          android:id="@+id/fl_main_content"
          android:layout_width="match_parent"
          android:layout_height="wrap_content"
-         android:layout_weight="1"
-         />
+         android:layout_weight="1">
+
+         <SurfaceView
+             android:id="@+id/surface_view"
+             android:layout_width="match_parent"
+             android:layout_height="250dp" />
+
+         <Button
+             android:layout_width="208dp"
+             android:layout_height="wrap_content"
+             android:onClick="tryPlay"
+             android:text="Play" />
+
+         <Button
+             android:layout_width="197dp"
+             android:layout_height="wrap_content"
+             android:onClick="tryStop"
+             android:text="STOP"
+             android:layout_gravity="right"/>
+     </FrameLayout>
 
     <RadioGroup
         android:id="@+id/rg_bottom_tag"

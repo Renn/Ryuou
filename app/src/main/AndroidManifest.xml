@@ -9,7 +9,8 @@
         android:label="龙王播放器"
         android:roundIcon="@drawable/longwang1"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme"
+        android:requestLegacyExternalStorage="true">
         <activity
             android:name=".util.testActivity"
             android:label="@string/title_activity_test"

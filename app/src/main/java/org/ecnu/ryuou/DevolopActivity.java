@@ -9,6 +9,6 @@ public class DevolopActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-   setContentView(R.layout.activity_devolop);
+        setContentView(R.layout.activity_devolop);
     }
 }
