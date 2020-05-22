@@ -9,8 +9,7 @@
         android:label="龙王播放器"
         android:roundIcon="@drawable/longwang1"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme"
-        android:requestLegacyExternalStorage="true">
+        android:theme="@style/AppTheme" >
         <activity
             android:name=".util.testActivity"
             android:label="@string/title_activity_test"
@@ -23,14 +22,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".DevolopActivity" />
-        <activity android:name=".CommonActivity" />
-        <activity android:name=".SubtitleActivity" />
-        <activity android:name=".MusicActivity" />
-        <activity android:name=".CodecActivity" />
-        <activity android:name=".PlayerActivity" />
-        <activity android:name=".aboutActivity" />
-        <activity android:name=".SetActivity" />
+        <activity android:name=".menu_setting.DevolopActivity" />
+        <activity android:name=".menu_setting.CommonActivity" />
+        <activity android:name=".menu_setting.SubtitleActivity" />
+        <activity android:name=".menu_setting.MusicActivity" />
+        <activity android:name=".menu_setting.CodecActivity" />
+        <activity android:name=".menu_setting.PlayerActivity" />
+        <activity android:name=".menu.AboutActivity" />
+        <activity android:name=".menu.SetActivity" />
         <activity
             android:name=".MainActivity"
             android:label="龙王播放器"

@@ -11,6 +11,7 @@ import android.text.format.Formatter;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -18,6 +19,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.ecnu.ryuou.R;
+import org.ecnu.ryuou.adapter.VideoPagerAdapter;
 import org.ecnu.ryuou.base.BasePager;
 import org.ecnu.ryuou.domain.MediaItem;
 import org.ecnu.ryuou.util.LogUtil;
@@ -25,6 +27,7 @@ import org.ecnu.ryuou.util.LogUtil;
 import java.util.ArrayList;
 
 import android.os.Handler;
+import android.widget.Toast;
 
 public class VideoPager extends BasePager {
 
@@ -43,7 +46,9 @@ public class VideoPager extends BasePager {
         public void handleMessage(Message msg){
         super.handleMessage(msg);
         if(mediaItems!=null &&mediaItems.size()>0){
-            videoPagerAdapter = new VideoPagerAdapter();
+            videoPagerAdapter = new VideoPagerAdapter(context,mediaItems);
+
+
          listview.setAdapter(videoPagerAdapter);
          tv_nomedia.setVisibility(View.GONE);
         }
@@ -61,8 +66,18 @@ public class VideoPager extends BasePager {
 
         tv_nomedia=view.findViewById(R.id.tv_nomedia);
         pb_loading = view.findViewById(R.id.pb_loading);
+//        设置item点击事件
+        listview.setOnItemClickListener(new MyOnItemClickListener());
         return view;
     }
+    class MyOnItemClickListener implements AdapterView.OnItemClickListener{
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            MediaItem mediaItem =  mediaItems.get(position);
+            Toast.makeText(context,"mediaItem=="+mediaItem.toString(),Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     @Override
     public void initData() {
@@ -109,49 +124,6 @@ public class VideoPager extends BasePager {
         }
         }.start();
     }
-    class VideoPagerAdapter extends BaseAdapter{
 
-        @Override
-        public int getCount() {
-            return mediaItems.size();
-        }
 
-        @Override
-        public Object getItem(int position) {
-            return null;
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return 0;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHoder viewHoder;
-            if(convertView==null){
-                convertView = View.inflate(context,R.layout.item_video_pager,null);
-                viewHoder = new ViewHoder();
-                viewHoder.iv_icon=convertView.findViewById(R.id.iv_icon);
-                viewHoder.tv_name=convertView.findViewById(R.id.tv_name);
-                viewHoder.tv_size=convertView.findViewById(R.id.tv_size);
-                viewHoder.tv_time=convertView.findViewById(R.id.tv_time);
-                convertView.getTag();
-            }else{
-
-                viewHoder = (ViewHoder) convertView.getTag();
-            }
-            MediaItem mediaItem = mediaItems.get(position);
-            viewHoder.tv_name.setText(mediaItem.getName());
-            viewHoder.tv_size.setText((int) mediaItem.getDuration());
-            viewHoder.tv_size.setText(Formatter.formatFileSize(context,mediaItem.getSize()));
-            return convertView;
-        }
-    }
-    static class ViewHoder{
-        ImageView iv_icon;
-        TextView tv_name;
-        TextView tv_time;
-        TextView tv_size;
-    }
 }

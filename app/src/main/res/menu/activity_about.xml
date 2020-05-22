@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/龙王播放器"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".menu.AboutActivity"
+    android:orientation="vertical"
+    ><!--  水平布局 -->
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textColor="#009688"
+    android:layout_marginStart="150dp"
+    android:textStyle="bold"
+    android:textSize="20sp"
+    android:gravity="center"
+    android:text="@string/关于龙王播放器"
+    />
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textColor="#009688"
+    android:layout_marginTop="18dp"
+    android:textStyle="bold"
+    android:textSize="18sp"
+    android:text="@string/简介"
+    />
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+
+    android:text="@string/简介内容"
+    />
+<TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textColor="#009688"
+    android:textStyle="bold"
+    android:textSize="18sp"
+    android:text="@string/支持"
+    android:layout_marginTop="98dp"
+    />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/支持内容"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#009688"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:text="@string/鸣谢"
+        android:layout_marginTop="98dp"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/鸣谢内容"
+        />
+
+</LinearLayout>
