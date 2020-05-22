@@ -13,13 +13,14 @@ set(CPP_SOURCE ${CMAKE_SOURCE_DIR}/src/main/cpp)
 # Gradle automatically packages shared libraries with your APK.
 
 add_library( # Sets the name of the library.
-        native-lib
+        player
 
         # Sets the library as a shared library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        ${CPP_SOURCE}/native-lib.cpp)
+        ${CPP_SOURCE}/player.cpp)
+
 
 # ==================================================
 # ffmpeg related headers
@@ -75,6 +76,12 @@ add_library(swscale
 set_target_properties(swscale PROPERTIES IMPORTED_LOCATION
         ${JNILIBS}/${CMAKE_ANDROID_ARCH_ABI}/libswscale.so)
 
+# for android
+#add_library(android
+#        SHARED
+#        IMPORTED)
+#set_target_properties(android PROPERTIES IMPORTED_LOCATION
+#        ${JNILIBS}/${CMAKE_ANDROID_ARCH_ABI}/libandroid.so)
 # ==================================================
 
 # Searches for a specified prebuilt library and stores the path as a
@@ -89,9 +96,10 @@ find_library( # Sets the name of the path variable.
         # Specifies the name of the NDK library that
         # you want CMake to locate.
         log)
+#find_library(android android)
 
 target_link_libraries(
-        native-lib
+        player
         ${log-lib}
         avcodec
         avdevice
@@ -100,4 +108,5 @@ target_link_libraries(
         avutil
         swresample
         swscale
+        android
 )

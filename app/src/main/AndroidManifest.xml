@@ -1,45 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.ecnu.ryuou" >
-<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
-    <application
-        android:name=".MainApplication"
-        android:allowBackup="true"
-        android:icon="@drawable/longwang1"
-        android:label="龙王播放器"
-        android:roundIcon="@drawable/longwang1"
-        android:supportsRtl="true"
-        android:theme="@style/AppTheme" >
-        <activity
-            android:name=".util.testActivity"
-            android:label="@string/title_activity_test"
-            android:theme="@style/AppTheme.NoActionBar" >
-        </activity>
-        <activity android:name=".SplashActivity" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+  package="org.ecnu.ryuou">
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity android:name=".menu_setting.DevolopActivity" />
-        <activity android:name=".menu_setting.CommonActivity" />
-        <activity android:name=".menu_setting.SubtitleActivity" />
-        <activity android:name=".menu_setting.MusicActivity" />
-        <activity android:name=".menu_setting.CodecActivity" />
-        <activity android:name=".menu_setting.PlayerActivity" />
-        <activity android:name=".menu.AboutActivity" />
-        <activity android:name=".menu.SetActivity" />
-        <activity
-            android:name=".MainActivity"
-            android:label="龙王播放器"
-            android:theme="@style/AppTheme.NoActionBar" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+  <application
+    android:name=".MainApplication"
+    android:allowBackup="true"
+    android:icon="@drawable/longwang1"
+    android:label="龙王播放器"
+    android:requestLegacyExternalStorage="true"
+    android:roundIcon="@drawable/longwang1"
+    android:supportsRtl="true"
+    android:theme="@style/AppTheme">
+    <activity android:name=".SplashActivity">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-    </application>
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+    </activity>
+    <activity android:name=".menu_setting.DevolopActivity" />
+    <activity android:name=".menu_setting.CommonActivity" />
+    <activity android:name=".menu_setting.SubtitleActivity" />
+    <activity android:name=".menu_setting.MusicActivity" />
+    <activity android:name=".menu_setting.CodecActivity" />
+    <activity android:name=".menu_setting.PlayerActivity" />
+    <activity android:name=".menu.AboutActivity" />
+    <activity android:name=".menu.SetActivity" />
+    <activity
+      android:name=".MainActivity"
+      android:label="龙王播放器"
+      android:theme="@style/AppTheme.NoActionBar">
+      <!--            <intent-filter>-->
+      <!--                <action android:name="android.intent.action.MAIN" />-->
+
+      <!--                <category android:name="android.intent.category.LAUNCHER" />-->
+      <!--            </intent-filter>-->
+    </activity>
+  </application>
 
 </manifest>

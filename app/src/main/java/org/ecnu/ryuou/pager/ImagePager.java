@@ -1,17 +1,15 @@
-package pager;
+package org.ecnu.ryuou.pager;
 
 import android.content.Context;
 import android.graphics.Color;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.TextView;
-
 import org.ecnu.ryuou.base.BasePager;
-import org.ecnu.ryuou.util.LogUtil;
 
-public class MusicPager extends BasePager {
+public class ImagePager extends BasePager {
     private TextView textView;
-    public MusicPager(Context context) {
+    public ImagePager(Context context) {
         super(context);
     }
 
@@ -24,10 +22,11 @@ public class MusicPager extends BasePager {
         return textView;
     }
 
+
     @Override
     public void initData() {
         super.initData();
 
-        textView.setText("截取片段");
+        textView.setText("");
     }
 }

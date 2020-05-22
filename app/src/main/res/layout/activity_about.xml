@@ -5,7 +5,7 @@
     android:id="@+id/龙王播放器"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".aboutActivity">
+  tools:context=".menu.AboutActivity">
 
 
     <TextView
