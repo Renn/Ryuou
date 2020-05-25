@@ -32,10 +32,23 @@
       android:layout_height="250dp" />
 
     <Button
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="bottom"
+      android:onClick="tryInit"
+      android:text="Init" />
+    <Button
       android:layout_width="208dp"
       android:layout_height="wrap_content"
       android:onClick="tryPlay"
       android:text="Play" />
+
+    <Button
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:onClick="tryPause"
+      android:text="Pause" />
 
     <Button
       android:layout_width="197dp"

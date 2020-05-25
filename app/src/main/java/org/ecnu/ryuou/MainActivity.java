@@ -104,16 +104,23 @@ public class MainActivity extends BaseActivity {
     });*/
   }
 
-  public void tryPlay(View view) {
+  public void tryInit(View view) {
     String videoPath = Environment.getExternalStorageDirectory().getPath()
         + File.separator + "Download" + File.separator + "test.mp4";
     LogUtil.d("tryPlay", videoPath);
     player.init(videoPath, surfaceHolder.getSurface());
+  }
+
+  public void tryPlay(View view) {
     player.start();
   }
 
   public void tryStop(View view) {
     player.stop();
+  }
+
+  public void tryPause(View view) {
+    player.pause();
   }
 
   private void setFragment() {
