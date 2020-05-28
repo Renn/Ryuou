@@ -44,9 +44,9 @@ public class MainActivity extends BaseActivity {
   private int position;
 
   // for player test
-//  private SurfaceView surfaceView;
-//  private SurfaceHolder surfaceHolder;
-//  private Player player;
+  private SurfaceView surfaceView;
+  private SurfaceHolder surfaceHolder;
+  private Player player;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -69,17 +69,17 @@ public class MainActivity extends BaseActivity {
     rg_bottom_tag.check(R.id.rb_video);
 
     // permission request
-//    if (ContextCompat
-//        .checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)
-//        != PackageManager.PERMISSION_GRANTED) {
-//      ActivityCompat.requestPermissions(MainActivity.this,
-//          new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
-//    }
+    if (ContextCompat
+        .checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)
+        != PackageManager.PERMISSION_GRANTED) {
+      ActivityCompat.requestPermissions(MainActivity.this,
+          new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+    }
 
     // for player test
-//    surfaceView = findViewById(R.id.surface_view);
-//    surfaceHolder = surfaceView.getHolder();
-//    player = Player.getPlayer();
+    surfaceView = findViewById(R.id.surface_view);
+    surfaceHolder = surfaceView.getHolder();
+    player = Player.getPlayer();
     /*
     surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
         String videoPath = Environment.getExternalStorageDirectory().getPath()
@@ -104,17 +104,17 @@ public class MainActivity extends BaseActivity {
     });*/
   }
 
-//  public void tryPlay(View view) {
-//    String videoPath = Environment.getExternalStorageDirectory().getPath()
-//        + File.separator + "Download" + File.separator + "test.mp4";
-//    LogUtil.d("tryPlay", videoPath);
-//    player.init(videoPath, surfaceHolder.getSurface());
-//    player.start();
-//  }
-//
-//  public void tryStop(View view) {
-//    player.stop();
-//  }
+  public void tryPlay(View view) {
+    String videoPath = Environment.getExternalStorageDirectory().getPath()
+        + File.separator + "Download" + File.separator + "test.mp4";
+    LogUtil.d("tryPlay", videoPath);
+    player.init(videoPath, surfaceHolder.getSurface());
+    player.start();
+  }
+
+  public void tryStop(View view) {
+    player.stop();
+  }
 
   private void setFragment() {
 //    android.app.FragmentManager manager = getFragmentManager();
