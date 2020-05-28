@@ -1,7 +1,9 @@
 package org.ecnu.ryuou.pager;
 
+import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Handler;
@@ -21,6 +23,7 @@ import java.util.ArrayList;
 import org.ecnu.ryuou.R;
 import org.ecnu.ryuou.base.BasePager;
 import org.ecnu.ryuou.domain.MediaItem;
+import org.ecnu.ryuou.player.Player;
 
 public class VideoPager extends BasePager {
 
@@ -29,6 +32,7 @@ public class VideoPager extends BasePager {
   private ProgressBar pb_loading;
   private VideoPagerAdapter videoPagerAdapter;
   private ArrayList<MediaItem> mediaItems;
+  @SuppressLint("HandlerLeak")
   private Handler handler = new Handler() {
     @Override
     public void handleMessage(Message msg) {
@@ -78,11 +82,11 @@ public class VideoPager extends BasePager {
         ContentResolver resolver = context.getContentResolver();
         Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
         String[] objs = {
-            MediaStore.Video.Media.DISPLAY_NAME,
-            MediaStore.Video.Media.DURATION,
-            MediaStore.Video.Media.SIZE,
-            MediaStore.Video.Media.DATA,
-            MediaStore.Video.Media.ARTIST
+                MediaStore.Video.Media.DISPLAY_NAME,
+                MediaStore.Video.Media.DURATION,
+                MediaStore.Video.Media.SIZE,
+                MediaStore.Video.Media.DATA,
+                MediaStore.Video.Media.ARTIST
         };
         Cursor cursor = resolver.query(uri, objs, null, null, null);
         if (cursor != null) {
@@ -114,6 +118,14 @@ public class VideoPager extends BasePager {
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
       MediaItem mediaItem = mediaItems.get(position);
       Toast.makeText(context, "mediaItem==" + mediaItem.toString(), Toast.LENGTH_SHORT).show();
+//      调起播放器
+      Intent intent = new Intent(context, SystemVideoPlayer.class);
+      intent.setDataAndType(Uri.parse(mediaItem.getData()),"video/*");
+      context.startActivity(intent);
+
+
+
+
     }
   }
 

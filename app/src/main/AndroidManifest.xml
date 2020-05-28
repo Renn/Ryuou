@@ -19,6 +19,9 @@
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
+    <activity android:name=".pager.SystemVideoPlayer"
+        android:theme="@style/AppTheme.NoActionBar"
+        android:configChanges="keyboardHidden|screenSize|orientation"/>
     <activity android:name=".menu_setting.DevolopActivity" />
     <activity android:name=".menu_setting.CommonActivity" />
     <activity android:name=".menu_setting.SubtitleActivity" />
