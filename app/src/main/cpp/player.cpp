@@ -274,7 +274,7 @@ Java_org_ecnu_ryuou_player_Player_initByNative(JNIEnv *env,
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_org_ecnu_ryuou_player_Player_playByNative(JNIEnv *env, jobject instance) {
+Java_org_ecnu_ryuou_player_Player_playByNative(JNIEnv *env, jobject instance, jobject callback) {
   if (paused) {
     paused = false;
   } else {
@@ -282,6 +282,7 @@ Java_org_ecnu_ryuou_player_Player_playByNative(JNIEnv *env, jobject instance) {
     instance = env->NewGlobalRef(instance);
     Arguments *args = new Arguments(instance);
     env->GetJavaVM(&jvm);
+
     pthread_create(&t_play, NULL, play_thread, args);
   }
 }
@@ -357,6 +358,11 @@ void *play_thread(void *args) {
                       player_info.out_sample_rate,
                       num_channels);
 
+  int skip_video = 0;
+  int skip_audio = 0;
+  long long video_count = 0;
+  long long audio_count = 0;
+
   // 播放
   while (av_read_frame(player_info.format_context, temp.packet) >= 0 && !stopped) {
     if (temp.packet->stream_index == player_info.video_stream_index) {
@@ -374,6 +380,16 @@ void *play_thread(void *args) {
         return NULL;
       }
 //      LOGE("frame.format=%d",frame->format);
+
+//      if(skip_video>=1){
+//        skip_video=0;
+//        continue;
+//      }
+//      skip_video++;
+//      video_count++;
+//      if(video_count>80000){
+//        LOGE("ERROR!!!!!!!!!!!!!!!!VIDEO");
+//      }
 
       // 数据格式转换
 #ifndef USE_YUV
@@ -428,14 +444,24 @@ void *play_thread(void *args) {
         LOGE("Player Error : Can not receive frame (codec step 2)");
         return NULL;
       }
+
+//      if (skip_audio>=1){
+//        skip_audio=0;
+//        continue;
+//      }
+//      skip_audio++;
+//      audio_count++;
+//      if(audio_count>80000){
+//        LOGE("ERROR!!!!!!!!!!!!!!!!!!!AUDIO");
+//      }
+
       //Resample
       swr_convert(player_info.swr_context,
                   &temp.audio_out_buffer,
                   player_info.out_sample_rate * 2,
                   (const uint8_t **) temp.frame->data,
                   temp.frame->nb_samples);
-      //todo:
-      // Relationship between size and sizeof(temp.audio_out_buffer) ?
+
       int size = av_samples_get_buffer_size(NULL,
                                             num_channels,
                                             temp.frame->nb_samples,
@@ -458,13 +484,14 @@ void *play_thread(void *args) {
     // 释放packet引用
     av_packet_unref(temp.packet);
   }
+  LOGE("video_count=%lld,audio_count=%lld", video_count, audio_count);
 #ifndef USE_YUV
   sws_freeContext(data_convert_context);
 #endif
   //Release allocated resources.
   env->CallVoidMethod(instance, reflection.release_audio_track_method_id);
   env->DeleteGlobalRef(instance);
-  delete args;
+  delete (Arguments *) args;
   release_resources();
   jvm->DetachCurrentThread();
   return NULL;

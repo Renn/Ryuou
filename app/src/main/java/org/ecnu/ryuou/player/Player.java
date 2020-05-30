@@ -37,8 +37,8 @@ public class Player implements PlayerController {
   }
 
   @Override
-  public ErrorCode start() {
-    playByNative();
+  public ErrorCode start(PlayerCallback callback) {
+    playByNative(callback);
     return ErrorCode.SUCCESS;
   }
 
@@ -57,7 +57,7 @@ public class Player implements PlayerController {
 
   private native void initByNative(String path, Surface surface);
 
-  private native void playByNative();
+  private native void playByNative(PlayerCallback callback);
 
   private native void stopByNative();
 
@@ -106,4 +106,5 @@ public class Player implements PlayerController {
       audioTrack = null;
     }
   }
+
 }

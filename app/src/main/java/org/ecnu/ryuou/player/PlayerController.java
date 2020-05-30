@@ -16,7 +16,7 @@ public interface PlayerController {
    *
    * @return ErrorCode to indicate the result
    */
-  ErrorCode start();
+  ErrorCode start(PlayerCallback callback);
 
   /**
    * Pause.
@@ -31,4 +31,9 @@ public interface PlayerController {
    * @return ErrorCode to indicate the result
    */
   ErrorCode stop();
+
+  interface PlayerCallback {
+
+    void onProgress(double current, double total);
+  }
 }
