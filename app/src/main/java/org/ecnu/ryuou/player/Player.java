@@ -33,6 +33,13 @@ public class Player implements PlayerController {
     this.file = "file:" + file;
     this.surface = surface;
     initByNative(file, surface);
+    return ErrorCode.SUCCESS;
+  }
+
+  /**
+   * Do nothing. For temporary compatibility only.
+   */
+  public ErrorCode start() {
     return null;
   }
 
@@ -54,6 +61,14 @@ public class Player implements PlayerController {
 //    LogUtil.e("Player","STOP button pressed");
     return ErrorCode.SUCCESS;
   }
+
+  @Override
+  public ErrorCode seekTo(double dest) {
+    seekToByNative(dest);
+    return ErrorCode.SUCCESS;
+  }
+
+  private native void seekToByNative(double dest);
 
   private native void initByNative(String path, Surface surface);
 

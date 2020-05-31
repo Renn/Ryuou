@@ -28,6 +28,7 @@ import org.ecnu.ryuou.pager.ImagePager;
 import org.ecnu.ryuou.pager.MusicPager;
 import org.ecnu.ryuou.pager.VideoPager;
 import org.ecnu.ryuou.player.Player;
+import org.ecnu.ryuou.player.PlayerController.PlayerCallback;
 import org.ecnu.ryuou.util.LogUtil;
 
 public class MainActivity extends BaseActivity {
@@ -109,7 +110,14 @@ public class MainActivity extends BaseActivity {
         + File.separator + "Download" + File.separator + "test.mp4";
     LogUtil.d("tryPlay", videoPath);
     player.init(videoPath, surfaceHolder.getSurface());
-    player.start();
+    player.seekTo(20);
+    player.start(new PlayerCallback() {
+      @Override
+      public void onProgress(double current, double total) {
+        LogUtil.d("Progress", String.format("current=%f,total=%f", current, total));
+      }
+    });
+//    player.seekTo(20);
   }
 
   public void tryStop(View view) {

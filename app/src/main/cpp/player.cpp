@@ -22,6 +22,7 @@ extern "C" {
 struct PlayerInfo {
   const char *path = NULL;
   AVFormatContext *format_context = NULL;
+  double total_length;
   /**
    * For video.
    */
@@ -58,11 +59,14 @@ struct Reflection {
   jmethodID create_audio_track_method_id;
   jmethodID add_to_audio_track_method_id;
   jmethodID release_audio_track_method_id;
+  jmethodID on_progress_method_id;
 };
 struct Arguments {
   jobject instance;
-  Arguments(jobject instance) {
+  jobject callback;
+  Arguments(jobject instance, jobject callback) {
     this->instance = instance;
+    this->callback = callback;
   }
 };
 
@@ -77,6 +81,8 @@ JavaVM *jvm = NULL;
  */
 bool paused = false;
 bool stopped = false;
+bool need_seek = false;
+double seek_dest;
 
 //struct SwsContext *data_convert_context;
 
@@ -159,6 +165,9 @@ Java_org_ecnu_ryuou_player_Player_initByNative(JNIEnv *env,
     return;
   }
   avcodec_open2(player_info.audio_codec_context, player_info.audio_codec, NULL);
+  player_info.total_length =
+      player_info.format_context->streams[player_info.audio_stream_index]->duration
+          * av_q2d(player_info.format_context->streams[player_info.audio_stream_index]->time_base);
 
   //Video related initialization
   player_info.video_width = player_info.video_codec_context->width;
@@ -270,6 +279,7 @@ Java_org_ecnu_ryuou_player_Player_initByNative(JNIEnv *env,
   //Status initialization
   paused = false;
   stopped = false;
+  need_seek = false;
 }
 
 extern "C"
@@ -278,11 +288,13 @@ Java_org_ecnu_ryuou_player_Player_playByNative(JNIEnv *env, jobject instance, jo
   if (paused) {
     paused = false;
   } else {
+    jclass callback_class = env->GetObjectClass(callback);
+    reflection.on_progress_method_id = env->GetMethodID(callback_class, "onProgress", "(DD)V");
     pthread_t t_play;
     instance = env->NewGlobalRef(instance);
-    Arguments *args = new Arguments(instance);
+    callback = env->NewGlobalRef(callback);
+    Arguments *args = new Arguments(instance, callback);
     env->GetJavaVM(&jvm);
-
     pthread_create(&t_play, NULL, play_thread, args);
   }
 }
@@ -335,6 +347,7 @@ void *play_thread(void *args) {
   }
 
   jobject instance = ((Arguments *) args)->instance;
+  jobject callback = ((Arguments *) args)->callback;
   // 临时存放函数调用结果（状态）
   int result;
 
@@ -474,6 +487,12 @@ void *play_thread(void *args) {
                           audio_sample_array,
                           size);
       env->DeleteLocalRef(audio_sample_array);
+      //Update playing progress
+      env->CallVoidMethod(callback,
+                          reflection.on_progress_method_id,
+                          temp.packet->pts
+                              * av_q2d(player_info.format_context->streams[player_info.audio_stream_index]->time_base),
+                          player_info.total_length);
     }
     //Busy wait if paused
     while (paused) {
@@ -483,8 +502,29 @@ void *play_thread(void *args) {
     }
     // 释放packet引用
     av_packet_unref(temp.packet);
+    if (need_seek) {
+      result = av_seek_frame(player_info.format_context,
+                             player_info.video_stream_index,
+                             (int64_t) (seek_dest
+                                 / av_q2d(player_info.format_context->streams[player_info.video_stream_index]->time_base)),
+                             AVSEEK_FLAG_BACKWARD);
+      if (result < 0) {
+        LOGE("Player Error : Failed to seek video frame");
+        break;
+      }
+      result = av_seek_frame(player_info.format_context,
+                             player_info.audio_stream_index,
+                             (int64_t) (seek_dest
+                                 / av_q2d(player_info.format_context->streams[player_info.audio_stream_index]->time_base)),
+                             AVSEEK_FLAG_BACKWARD);
+      if (result < 0) {
+        LOGE("Player Error : Failed to seek audio frame");
+        break;
+      }
+      need_seek = false;
+    }
   }
-  LOGE("video_count=%lld,audio_count=%lld", video_count, audio_count);
+//  LOGE("video_count=%lld,audio_count=%lld", video_count, audio_count);
 #ifndef USE_YUV
   sws_freeContext(data_convert_context);
 #endif
@@ -507,4 +547,9 @@ extern "C"
 JNIEXPORT void JNICALL
 Java_org_ecnu_ryuou_player_Player_pauseByNative(JNIEnv *env, jobject thiz) {
   paused = true;
+}extern "C"
+JNIEXPORT void JNICALL
+Java_org_ecnu_ryuou_player_Player_seekToByNative(JNIEnv *env, jobject thiz, jdouble dest) {
+  seek_dest = dest;
+  need_seek = true;
 }

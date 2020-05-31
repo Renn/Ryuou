@@ -32,6 +32,13 @@ public interface PlayerController {
    */
   ErrorCode stop();
 
+  /**
+   * Seek to the frame specified by <code>dest</code> (in seconds).
+   *
+   * @return ErrorCode to indicate the result
+   */
+  ErrorCode seekTo(double dest);
+
   interface PlayerCallback {
 
     void onProgress(double current, double total);
