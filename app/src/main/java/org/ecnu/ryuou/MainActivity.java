@@ -105,6 +105,9 @@ public class MainActivity extends BaseActivity {
     });*/
   }
 
+  /**
+   *  for player test
+   */
   public void tryPlay(View view) {
     String videoPath = Environment.getExternalStorageDirectory().getPath()
         + File.separator + "Download" + File.separator + "test.mp4";
@@ -120,8 +123,29 @@ public class MainActivity extends BaseActivity {
 //    player.seekTo(20);
   }
 
+  /**
+   *  for player test
+   */
   public void tryStop(View view) {
     player.stop();
+  }
+
+  /**
+   *  for player test
+   */
+  public void tryCut(View view) {
+    // permission request
+    if (ContextCompat
+        .checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        != PackageManager.PERMISSION_GRANTED) {
+      ActivityCompat.requestPermissions(MainActivity.this,
+          new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+    }
+    String videoPath = Environment.getExternalStorageDirectory().getPath()
+        + File.separator + "Download" + File.separator + "test.mp4";
+    double start = 10;
+    double dest = 25;
+    player.cut(videoPath, start, dest);
   }
 
   private void setFragment() {

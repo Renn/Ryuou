@@ -20,7 +20,6 @@ public class Player implements PlayerController {
   private Player() {
   }
 
-
   public static Player getPlayer() {
     if (player == null) {
       player = new Player();
@@ -68,6 +67,12 @@ public class Player implements PlayerController {
     return ErrorCode.SUCCESS;
   }
 
+  @Override
+  public ErrorCode cut(String file, double start, double dest) {
+    cutByNative(file, start, dest);
+    return ErrorCode.SUCCESS;
+  }
+
   private native void seekToByNative(double dest);
 
   private native void initByNative(String path, Surface surface);
@@ -77,6 +82,8 @@ public class Player implements PlayerController {
   private native void stopByNative();
 
   private native void pauseByNative();
+
+  private native void cutByNative(String file, double start, double dest);
 
   /**
    * Called by native code using reflection.

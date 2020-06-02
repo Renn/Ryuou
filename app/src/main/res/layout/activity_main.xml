@@ -43,6 +43,13 @@
       android:layout_gravity="right"
       android:onClick="tryStop"
       android:text="STOP" />
+
+    <Button
+        android:layout_width="197dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:onClick="tryCut"
+        android:text="CUT" />
   </FrameLayout>
 
   <RadioGroup
