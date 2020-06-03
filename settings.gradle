@@ -1,2 +1,3 @@
 rootProject.name='Ryuou'
 include ':app'
+include ':xListView'
