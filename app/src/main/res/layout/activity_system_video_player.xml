@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-    <RelativeLayout android:layout_height="match_parent" android:background="#000000" android:gravity="center" android:layout_width="match_parent" xmlns:android="http://schemas.android.com/apk/res/android">
+<RelativeLayout android:layout_height="match_parent" android:background="#000000" android:gravity="center" android:layout_width="match_parent" xmlns:android="http://schemas.android.com/apk/res/android">
 
     <org.ecnu.ryuou.pager.SurfaceView android:layout_height="250dp"
         android:layout_width="match_parent" android:id="@+id/surface_view"/>
     <include layout="@layout/media_controller"/>
-
+    <TextView
+        android:id="@+id/srtView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textColor="#4CAF50"
+        android:textStyle="bold"
+        android:layout_marginTop="252dp"
+        android:text="@string/subtitle"
+        />
 </RelativeLayout>
