@@ -137,6 +137,7 @@ import androidx.core.content.ContextCompat;
 import org.ecnu.ryuou.BaseActivity;
 import org.ecnu.ryuou.MainActivity;
 import org.ecnu.ryuou.R;
+import org.ecnu.ryuou.SubtitleFileReader.ParseSrt;
 import org.ecnu.ryuou.player.Player;
 import org.ecnu.ryuou.player.PlayerController;
 import org.ecnu.ryuou.util.LogUtil;
@@ -345,6 +346,20 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
         surfaceView = findViewById(R.id.surface_view);
         surfaceHolder = surfaceView.getHolder();
         player = Player.getPlayer();
+      //TODO:将字幕显示在activity_system_video_player的TextView，@+id/srtView
+        ParseSrt test=new ParseSrt();
+       test.parseSrt("C:\\Users\\huangqianru\\Desktop\\ruru.srt");
+      //  test.showSRT();
+      //TreeMap<Integer, SRT> srt_map=test.srt_map;
+      //Iterator<Integer> keys = srt_map.keySet().iterator();
+      //  while (keys.hasNext()) {
+      //text=(TextView)this.findViewById(R.id.srtView);
+      //  Integer key = keys.next();
+      //  SRT srtbean = srt_map.get(key);
+      //  text.setText(srtbean.getSrtBody());
+      //  System.out.println(srtbean
+      //         .getSrtBody());
+      // }
 
 
     }
