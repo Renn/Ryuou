@@ -348,8 +348,8 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
         player = Player.getPlayer();
 
       //TODO:将字幕显示在activity_system_video_player的TextView，@+id/srtView
-        ParseSrt test=new ParseSrt();
-        test.parseSrt("C:\\Users\\huangqianru\\Desktop\\ruru.srt");
+       // ParseSrt test=new ParseSrt();
+        //test.parseSrt("C:\\Users\\huangqianru\\Desktop\\ruru.srt");
       //  test.showSRT();
       //TreeMap<Integer, SRT> srt_map=test.srt_map;
       //Iterator<Integer> keys = srt_map.keySet().iterator();
