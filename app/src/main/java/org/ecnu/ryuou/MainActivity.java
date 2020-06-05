@@ -11,7 +11,6 @@ import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import org.ecnu.ryuou.player.Player;
 import android.widget.FrameLayout;
 import android.widget.RadioGroup;
 import androidx.appcompat.widget.Toolbar;
@@ -23,12 +22,14 @@ import java.io.File;
 import java.util.ArrayList;
 import org.ecnu.ryuou.base.BasePager;
 import org.ecnu.ryuou.base.ReplaceFragment;
+import org.ecnu.ryuou.editor.Editor;
 import org.ecnu.ryuou.menu.AboutActivity;
 import org.ecnu.ryuou.menu.SetActivity;
 import org.ecnu.ryuou.pager.ImagePager;
 import org.ecnu.ryuou.pager.MusicPager;
 import org.ecnu.ryuou.pager.VideoPager;
 import org.ecnu.ryuou.player.Player;
+import org.ecnu.ryuou.player.PlayerController.PlayerCallback;
 import org.ecnu.ryuou.util.LogUtil;
 
 public class MainActivity extends BaseActivity {
@@ -43,7 +44,12 @@ public class MainActivity extends BaseActivity {
   private ArrayList<BasePager> basePagers;
 
   private int position;
-
+  /**
+   * for player test
+   */
+  private SurfaceView surfaceView;
+  private SurfaceHolder surfaceHolder;
+  private Player player;
 
 
   @Override
@@ -73,10 +79,58 @@ public class MainActivity extends BaseActivity {
       ActivityCompat.requestPermissions(MainActivity.this,
           new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
     }
-
+    /**
+     * for player test
+     */
+    surfaceView = findViewById(R.id.surface_view);
+    surfaceHolder = surfaceView.getHolder();
+    player = Player.getPlayer();
 
   }
 
+  /**
+   * for player test
+   */
+  public void tryPlay(View view) {
+    String videoPath = Environment.getExternalStorageDirectory().getPath()
+        + File.separator + "Download" + File.separator + "test.mp4";
+    LogUtil.d("tryPlay", videoPath);
+    player.init(videoPath, surfaceHolder.getSurface());
+    player.seekTo(20);
+    player.start(new PlayerCallback() {
+      @Override
+      public void onProgress(double current, double total) {
+        LogUtil.d("Progress", String.format("current=%f,total=%f", current, total));
+      }
+    });
+//    player.seekTo(20);
+  }
+
+  /**
+   * for player test
+   */
+  public void tryStop(View view) {
+    player.stop();
+  }
+
+  /**
+   * for player test
+   */
+  public void tryCut(View view) {
+    // permission request
+    if (ContextCompat
+        .checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        != PackageManager.PERMISSION_GRANTED) {
+      ActivityCompat.requestPermissions(MainActivity.this,
+          new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+    }
+    String videoPath = Environment.getExternalStorageDirectory().getPath()
+        + File.separator + "Download" + File.separator + "test.mp4";
+    double start = 10;
+    double dest = 25;
+    Editor editor = Editor.getEditor();
+    editor.cut(videoPath, start, dest);
+  }
 
 
   private void setFragment() {

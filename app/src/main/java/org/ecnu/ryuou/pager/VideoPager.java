@@ -15,11 +15,13 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import org.ecnu.ryuou.R;
 import org.ecnu.ryuou.base.BasePager;
 import org.ecnu.ryuou.domain.MediaItem;
@@ -27,12 +29,13 @@ import org.ecnu.ryuou.domain.MediaItem;
 
 public class VideoPager extends BasePager {
 
-  private ListView listview;
+  private XListView listview;
   private TextView tv_nomedia;
   private ProgressBar pb_loading;
+  private SwipeRefreshLayout swipeLayout;
+
   private VideoPagerAdapter videoPagerAdapter;
   private ArrayList<MediaItem> mediaItems;
-
   @SuppressLint("HandlerLeak")
   private Handler handler = new Handler() {
     @Override
@@ -42,6 +45,7 @@ public class VideoPager extends BasePager {
         videoPagerAdapter = new VideoPagerAdapter(context, mediaItems);
 
         listview.setAdapter(videoPagerAdapter);
+        onLoad();
         tv_nomedia.setVisibility(View.GONE);
       } else {
         tv_nomedia.setVisibility(View.VISIBLE);
@@ -54,6 +58,13 @@ public class VideoPager extends BasePager {
     super(context);
   }
 
+  //  time
+  public String getSystemTime() {
+    SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
+    return format.format(new Date());
+  }
+
+
   @Override
   public View initView() {
     View view = View.inflate(context, R.layout.video_pager, null);
@@ -63,11 +74,16 @@ public class VideoPager extends BasePager {
     pb_loading = view.findViewById(R.id.pb_loading);
 //        设置item点击事件
     listview.setOnItemClickListener(new MyOnItemClickListener());
+    listview.setPullLoadEnable(true);
+    listview.setXListViewListener(new myIXListViewListener());
     return view;
-
   }
 
-
+  private void onLoad() {
+    listview.stopRefresh();
+    listview.stopLoadMore();
+    listview.setRefreshTime("更新时间：" + getSystemTime());
+  }
 
   @Override
   public void initData() {
@@ -86,11 +102,11 @@ public class VideoPager extends BasePager {
         ContentResolver resolver = context.getContentResolver();
         Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
         String[] objs = {
-                MediaStore.Video.Media.DISPLAY_NAME,
-                MediaStore.Video.Media.DURATION,
-                MediaStore.Video.Media.SIZE,
-                MediaStore.Video.Media.DATA,
-                MediaStore.Video.Media.ARTIST
+            MediaStore.Video.Media.DISPLAY_NAME,
+            MediaStore.Video.Media.DURATION,
+            MediaStore.Video.Media.SIZE,
+            MediaStore.Video.Media.DATA,
+            MediaStore.Video.Media.ARTIST
         };
         Cursor cursor = resolver.query(uri, objs, null, null, null);
         if (cursor != null) {
@@ -116,20 +132,34 @@ public class VideoPager extends BasePager {
     }.start();
   }
 
-  class MyOnItemClickListener implements AdapterView.OnItemClickListener {
+  class myIXListViewListener implements XListView.IXListViewListener {
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-      MediaItem mediaItem = mediaItems.get(position);
-      Toast.makeText(context, "mediaItem==" + mediaItem.toString(), Toast.LENGTH_SHORT).show();
-//      调起播放器
-      Intent intent = new Intent(context, SystemVideoPlayer.class);
-      intent.setDataAndType(Uri.parse(mediaItem.getData()),"video/*");
-      context.startActivity(intent);
+    public void onRefresh() {
+      getDataFromLocal();
+
+    }
+
+    @Override
+    public void onLoadMore() {
 
     }
   }
 
+  class MyOnItemClickListener implements AdapterView.OnItemClickListener {
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+      MediaItem mediaItem = mediaItems.get(position - 1);
+      Toast.makeText(context, "mediaItem==" + mediaItem.toString(), Toast.LENGTH_SHORT).show();
+//      调起播放器
+      Intent intent = new Intent(context, SystemVideoPlayer.class);
+      intent.setDataAndType(Uri.parse(mediaItem.getData()), "video/*");
+      context.startActivity(intent);
+
+
+    }
+  }
 
 }
 
@@ -169,7 +199,7 @@ class VideoPagerAdapter extends BaseAdapter {
       viewHolder.tv_name = convertView.findViewById(R.id.tv_name);
       viewHolder.tv_size = convertView.findViewById(R.id.tv_size);
       viewHolder.tv_time = convertView.findViewById(R.id.tv_time);
-      convertView.getTag();
+      convertView.setTag(viewHolder);
     } else {
 
       viewHolder = (ViewHolder) convertView.getTag();

@@ -1,13 +1,11 @@
 package org.ecnu.ryuou.SubtitleFileReader;
-import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
-import java.util.TreeMap;
-import java.lang.String;
 import java.util.Iterator;
+import java.util.TreeMap;
 public class ParseSrt {
   /**
    * 解析SRT字幕文件
@@ -22,7 +20,7 @@ public class ParseSrt {
     FileInputStream inputStream = null;
     try {
       inputStream = new FileInputStream(srtPath);
-      srtPath = "C:\\Users\\huangqianru\\Desktop\\ruru.srt";
+//      srtPath = "C:\\Users\\huangqianru\\Desktop\\ruru.srt";
     } catch (FileNotFoundException e) {
       e.printStackTrace();
       return;// 有异常，就没必要继续下去了

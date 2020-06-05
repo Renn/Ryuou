@@ -39,12 +39,6 @@ public interface PlayerController {
    */
   ErrorCode seekTo(double dest);
 
-  /**
-   * Cut and save frames from <code>start</code> to <code>dest</code> of <code>file</code></code> (in seconds).
-   *
-   * @return ErrorCode to indicate the result
-   */
-  ErrorCode cut(String file, double start, double dest);
 
   interface PlayerCallback {
 
