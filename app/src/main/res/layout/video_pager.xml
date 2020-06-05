@@ -2,7 +2,7 @@
 <androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="match_parent"
   android:layout_height="match_parent">
-
+  <!--todo: androidx or xlistview? choose only one-->
     <org.ecnu.ryuou.pager.XListView
       android:id="@+id/listview"
       android:layout_width="match_parent"
