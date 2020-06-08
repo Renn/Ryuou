@@ -8,6 +8,8 @@
 #include <android/log.h>
 #include "player.h"
 #include <pthread.h>
+#include <stdio.h>
+#include <string>
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -15,6 +17,9 @@ extern "C" {
 #include <libswscale/swscale.h>
 #include <libavutil/imgutils.h>
 #include <libswresample/swresample.h>
+#include <libavfilter/avfilter.h>
+#include <libavfilter/buffersrc.h>
+#include <libavfilter/buffersink.h>
 }
 
 
@@ -41,6 +46,16 @@ struct PlayerInfo {
   int out_sample_rate;
   uint64_t out_channel_config;
   AVSampleFormat out_format;
+  /**
+   * For subtitle.
+   */
+  const AVFilter *buffersrc = NULL;
+  const AVFilter *buffersink = NULL;
+  AVFilterInOut *output = NULL;
+  AVFilterInOut *input = NULL;
+  AVFilterGraph *filter_graph = NULL;
+  AVFilterContext *buffersrc_context = NULL;
+  AVFilterContext *buffersink_context = NULL;
 };
 
 struct Native {
@@ -54,6 +69,10 @@ struct Temp {
   AVFrame *frame = NULL;
   AVFrame *rgba_frame = NULL;
   uint8_t *audio_out_buffer = NULL;
+  /*
+   * For subtitle.
+   */
+  AVFrame *filter_frame = NULL;
 };
 struct Reflection {
   jmethodID create_audio_track_method_id;
@@ -98,8 +117,6 @@ Java_org_ecnu_ryuou_player_Player_initByNative(JNIEnv *env,
 
   // Java String -> C String
   player_info.path = env->GetStringUTFChars(path_, 0);
-  // 注册
-  //av_register_all();
 
   // 初始化 AVformat_context
   player_info.format_context = avformat_alloc_context();
@@ -276,6 +293,7 @@ Java_org_ecnu_ryuou_player_Player_initByNative(JNIEnv *env,
       env->GetMethodID(player_class, "addToAudioTrack", "([BI)V");
   reflection.release_audio_track_method_id =
       env->GetMethodID(player_class, "releaseAudioTrack", "()V");
+
   //Status initialization
   paused = false;
   stopped = false;
@@ -335,6 +353,100 @@ void release_resources() {
   }
 }
 
+void initSubtitleFilter(char *subtitle_filename) {
+  player_info.buffersrc = avfilter_get_by_name("buffer");
+  player_info.buffersink = avfilter_get_by_name("buffersink");
+  player_info.output = avfilter_inout_alloc();
+  player_info.input = avfilter_inout_alloc();
+  player_info.filter_graph = avfilter_graph_alloc();
+
+  char args[10000];
+  sprintf(args,
+          "video_size=%dx%d:pix_fmt=%d:time_base=%d/%d:pixel_aspect=%d/%d",
+          player_info.video_width,
+          player_info.video_height,
+          player_info.video_codec_context->pix_fmt,
+          player_info.format_context->streams[player_info.video_stream_index]->time_base.num,
+          player_info.format_context->streams[player_info.video_stream_index]->time_base.den,
+          player_info.video_codec_context->sample_aspect_ratio.num,
+          player_info.video_codec_context->sample_aspect_ratio.den);
+
+  char filter_desc[10000];
+  //subtitle_filename.replace('/', "\\\\");
+  sprintf(filter_desc, "subtitles=filename='%s':original_size=%dx%d",
+          subtitle_filename,
+          player_info.video_width,
+          player_info.video_height);
+  //subtitleFilename.replace('/', "\\\\");
+  //subtitleFilename.insert(subtitleFilename.indexOf(":\\"), char('\\'));
+
+  //auto release = [&output, &input] {
+  //  avfilter_inout_free(&output);
+  //  avfilter_inout_free(&input);
+  //};
+
+  if (!player_info.output || !player_info.input || !player_info.filter_graph) {
+    return;
+  }
+
+  //创建输入过滤器，需要arg
+  if (avfilter_graph_create_filter(&player_info.buffersrc_context, player_info.buffersrc, "in",
+                                   args, NULL, player_info.filter_graph) < 0) {
+    LOGE("Player Error : Can not create in filter");
+    return;
+  }
+
+  if (avfilter_graph_create_filter(&player_info.buffersink_context, player_info.buffersink, "out",
+                                   NULL, NULL, player_info.filter_graph) < 0) {
+    LOGE("Player Error : Can not create out filter");
+    return;
+  }
+
+  player_info.output->name = av_strdup("in");
+  player_info.output->next = NULL;
+  player_info.output->pad_idx = 0;
+  player_info.output->filter_ctx = player_info.buffersrc_context;
+
+  player_info.input->name = av_strdup("out");
+  player_info.input->next = NULL;
+  player_info.input->pad_idx = 0;
+  player_info.input->filter_ctx = player_info.buffersink_context;
+
+  // TODO：parse string 不成功
+  char filter_desc2[80] = "subtitles=\\\/storage\\\/emulated\\\/0\\\/Download\\\/test.srt:original_size=960x544";
+  int result = avfilter_graph_parse_ptr(player_info.filter_graph, filter_desc2,
+                               &(player_info.output), &(player_info.input), NULL);
+  if (result < 0) {
+    LOGE("Player Error : Can not parse string to graph");
+    return;
+  }
+
+  if (avfilter_graph_config(player_info.filter_graph, NULL) < 0) {
+    LOGE("Player Error : Can not config graph");
+    return;
+  }
+
+  temp.filter_frame = av_frame_alloc();
+
+}
+
+void playSubtitle() {
+  int result;
+  // 用subtitlefilter过滤图像
+  result = av_buffersrc_add_frame_flags(player_info.buffersrc_context, temp.frame, AV_BUFFERSRC_FLAG_KEEP_REF);
+  if (result < 0) {
+    LOGE("Player Error : Can not add frame flags");
+    return;
+  }
+  result = av_buffersink_get_frame(player_info.buffersink_context, temp.filter_frame);
+  if (result < 0) {
+    LOGE("Player Error : Can not use subtitle filter");
+    return;
+  }
+}
+
+
+
 void *play_thread(void *args) {
   //Get thread-specific jnienv and instance
   JNIEnv *env = NULL;
@@ -375,6 +487,10 @@ void *play_thread(void *args) {
   int skip_audio = 0;
   long long video_count = 0;
   long long audio_count = 0;
+
+  //char subtitle_filename[50] = "/storage/emulated/0/Download/test.srt";
+  //initSubtitleFilter(player_info.buffersrcContext, player_info.buffersinkContext, subtitle_filename);
+
 
   // 播放
   while (av_read_frame(player_info.format_context, temp.packet) >= 0 && !stopped) {
@@ -468,6 +584,8 @@ void *play_thread(void *args) {
 //        LOGE("ERROR!!!!!!!!!!!!!!!!!!!AUDIO");
 //      }
 
+      // TODO: play subtitle here
+
       //Resample
       swr_convert(player_info.swr_context,
                   &temp.audio_out_buffer,
@@ -555,4 +673,3 @@ Java_org_ecnu_ryuou_player_Player_seekToByNative(JNIEnv *env, jobject thiz, jdou
   seek_dest = dest;
   need_seek = true;
 }
-

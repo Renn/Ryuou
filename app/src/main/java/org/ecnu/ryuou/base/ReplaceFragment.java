@@ -17,6 +17,9 @@ public class ReplaceFragment extends Fragment {
         this.currPager=pager;
     }
 
+    public ReplaceFragment() {
+
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
