@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.RadioGroup;
 import androidx.appcompat.widget.Toolbar;
@@ -18,6 +19,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import com.afollestad.materialdialogs.MaterialDialog;
+
 import java.io.File;
 import java.util.ArrayList;
 import org.ecnu.ryuou.base.BasePager;
@@ -50,13 +53,23 @@ public class MainActivity extends BaseActivity {
   private SurfaceView surfaceView;
   private SurfaceHolder surfaceHolder;
   private Player player;
-
-
+  private Button btn1;//为cut按钮设定dialog监听事件
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-//    setContentView(R.layout.activity_main);
+    btn1=(Button) findViewById(R.id.cut);
+    btn1.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        new MaterialDialog.Builder(MainActivity.this)
+                .title("请输入截取的开始和结束时间")
+                .customView(R.layout.dialog, true)
+                .positiveText("确认")
+                .show();
+      }
+    });
+
     Toolbar toolbar = findViewById(R.id.文件夹);
     setSupportActionBar(toolbar);
 

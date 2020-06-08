@@ -45,6 +45,7 @@
       android:text="STOP" />
 
     <Button
+        android:id="@+id/cut"
         android:layout_width="197dp"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
