@@ -1,5 +1,8 @@
 package org.ecnu.ryuou.SubtitleFileReader;
 
+import android.text.Spanned;
+import android.text.Html;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -101,17 +104,17 @@ public class ParseSrt {
     while (keys.hasNext()) {
       Integer key = keys.next();
       SRT srtbean = srt_map.get(key);
-//      if (currentPosition > srtbean.getBeginTime()
-//              && currentPosition < srtbean.getEndTime()) {
+   // if (currentPosition > srtbean.getBeginTime()  //todo:TreeMap.keySet()是一个空指针无法将currentPosition传入showSRT()
+      //       && currentPosition < srtbean.getEndTime()) {
 ////Html.fromHtml可以解析出字幕内容的格式
-//        Spanned srtBodyHtml = Html.fromHtml(srtbean
+       //Spanned srtBodyHtml = Html.fromHtml(srtbean
 //                .getSrtBody());
 //        tvsrt.setText(srtBodyHtml);
-//        break;//找到后就没必要继续遍历下去，节约资源
-//      }
+     // break;//找到后就没必要继续遍历下去，节约资源
+      //}
       System.out.println(srtbean
               .getSrtBody());
-      //break;//找到后就没必要继续遍历下去，节约资源
+    break;//找到后就没必要继续遍历下去，节约资源
     }
   }
 

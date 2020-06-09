@@ -116,6 +116,7 @@ package org.ecnu.ryuou.pager;
 import android.Manifest;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -149,7 +150,6 @@ import org.ecnu.ryuou.util.LogUtil;
 public class SystemVideoPlayer extends BaseActivity implements android.view.View.OnClickListener  {
 //    全屏
 
-    private static final int FULL_SCREEN =1 ;
     private static final int PROGRESS = 1;
 
     static {
@@ -180,7 +180,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     private int screenWidth = 0;
     private int screenHeight = 0;
     private boolean isnotPlay;
-    private double currentPosition;
+    public double currentPosition;
     private double totalPosition;
 ////    /**
 ////     * Find the Views in the layout<br />
@@ -189,10 +189,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
 ////     * (http://www.buzzingandroid.com/tools/android-layout-finder)
 ////     */
     private void findViews() {
-        llTop = (LinearLayout)findViewById( R.id.ll_top );
         tvName = (TextView)findViewById( R.id.tv_name );
-        ivBattery = (ImageView)findViewById( R.id.iv_battery );
-        tvSystemTime = (TextView)findViewById( R.id.tv_system_time );
         btnVoice = (Button)findViewById( R.id.btn_voice );
         seekbarVoice = (SeekBar)findViewById( R.id.seekbar_voice );
         llBottom = (LinearLayout)findViewById( R.id.ll_bottom );
@@ -203,7 +200,6 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
         btnVideoPre = (Button)findViewById( R.id.btn_video_pre );
         btnVideoStartPause = (Button)findViewById( R.id.btn_video_start_pause );
         btnVideoNext = (Button)findViewById( R.id.btn_video_next );
-        btnVideoSwitchScreen = (Button)findViewById( R.id.btn_video_switch_screen );
 
         btnVoice.setOnClickListener( this );
 
@@ -211,7 +207,6 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
         btnVideoPre.setOnClickListener( this );
         btnVideoStartPause.setOnClickListener( this );
         btnVideoNext.setOnClickListener( this );
-        btnVideoSwitchScreen.setOnClickListener( this );
     }
 
 ////    /**
@@ -248,9 +243,10 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
                   @Override
                   public void run() {
                     currentPosition = current;
+               //     new ParseSrt().showSRT(currentPosition);
                     totalPosition = total;
                     seekbarVideo.setMax((int) total);
-//                      LogUtil.d("Progress", String.format("current=%f,total=%f", currentPosition, total));
+                   //   LogUtil.d("Progress", String.format("current=%f,total=%f", currentPosition, total));
                     tvDuration.setText(String.format("%.2f", total));
                     handler.sendEmptyMessage(PROGRESS);
                   }
@@ -271,10 +267,6 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
 
         } else if ( v == btnVideoNext ) {
             // Handle clicks for btnVideoNext
-        } else if ( v == btnVideoSwitchScreen ) {
-            // Handle clicks for btnVideoSwitchScreen
-            setVideoType(FULL_SCREEN);
-            
         }
     }
 
@@ -299,35 +291,20 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
 
 
 
-    private void setVideoType(int fullScreen) {
-       if(isnotFull){
-           isnotFull = !isnotFull;
-           surfaceView.setVideoSize(screenWidth,screenHeight);
-           setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-           btnVideoSwitchScreen.setBackgroundResource(R.drawable.jz_enlarge);
-       }
-       else{
-//           int mVideoWidth =110;
-//           int mvideoHeight = 50 ;
-//           int width = screenWidth;
-//           int height = screenHeight;
-//
-//           if(mvideoHeight*height<width*mvideoHeight){
-//               width=height*mVideoWidth/mvideoHeight;
-//           }
-//           else if(mVideoWidth*height>width*mvideoHeight){
-//               height = width*mvideoHeight/mVideoWidth;
-//           }
 
-//           surfaceView.setVideoSize(width,height);
-           surfaceView.setVideoSize(screenWidth,screenHeight);
-           setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-           btnVideoSwitchScreen.setBackgroundResource(R.drawable.jz_enlarge);
-        }
+
+  @Override
+  protected void onResume() {
+    /**
+     * 设置为横屏
+     */
+    if(getRequestedOrientation()!=ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE){
+      setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
+    super.onResume();
+  }
 
-
-    @Override
+  @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
@@ -358,7 +335,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
       ParseSrt test = new ParseSrt();
       test.parseSrt(Environment.getExternalStorageDirectory().getPath()
           + File.separator + "Download" + File.separator + "test.srt");
-      test.showSRT();
+     // test.showSRT(currentPosition);
       TreeMap<Integer, SRT> srt_map = test.srt_map;
       Iterator<Integer> keys = srt_map.keySet().iterator();
       while (keys.hasNext()) {
@@ -371,6 +348,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
 
 
     }
+
 
 
     public void tryPlay(View view) {
@@ -391,8 +369,10 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
   public void tryStop(View view) {
     player.stop();
   }
+
     public void tryCut(View view) {
-        // permission request
+
+      // permission request
         if (ContextCompat
                 .checkSelfPermission(SystemVideoPlayer.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -405,6 +385,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
         double dest = 25;
       Editor editor = Editor.getEditor();
       editor.cut(videoPath, start, dest);
+
     }
 
 

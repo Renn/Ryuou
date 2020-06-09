@@ -1,16 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<RelativeLayout android:layout_height="match_parent" android:background="#000000" android:gravity="center" android:layout_width="match_parent" xmlns:android="http://schemas.android.com/apk/res/android">
+<RelativeLayout android:layout_height="match_parent" android:background="#000000" android:gravity="center"
+    android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+   >
 
-    <org.ecnu.ryuou.pager.SurfaceView android:layout_height="250dp"
-        android:layout_width="match_parent" android:id="@+id/surface_view"/>
-    <include layout="@layout/media_controller"/>
+    <org.ecnu.ryuou.pager.SurfaceView
+        android:id="@+id/surface_view"
+        android:layout_width="match_parent"
+        android:layout_height="450dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true" />
+
+    <include
+        layout="@layout/media_controller"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        />
     <TextView
         android:id="@+id/srtView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:textColor="#4CAF50"
-        android:textStyle="bold"
-        android:layout_marginTop="252dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="300dp"
         android:text="@string/subtitle"
-        />
+        android:textColor="#4CAF50"
+        android:textStyle="bold" />
+
 </RelativeLayout>
