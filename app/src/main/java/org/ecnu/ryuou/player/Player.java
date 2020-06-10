@@ -67,11 +67,6 @@ public class Player implements PlayerController {
     return ErrorCode.SUCCESS;
   }
 
-  @Override
-  public ErrorCode cut(String file, double start, double dest) {
-    cutByNative(file, start, dest);
-    return ErrorCode.SUCCESS;
-  }
 
   private native void seekToByNative(double dest);
 
@@ -82,8 +77,6 @@ public class Player implements PlayerController {
   private native void stopByNative();
 
   private native void pauseByNative();
-
-  private native void cutByNative(String file, double start, double dest);
 
   /**
    * Called by native code using reflection.

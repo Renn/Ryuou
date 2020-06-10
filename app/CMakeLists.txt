@@ -21,6 +21,8 @@ add_library( # Sets the name of the library.
         # Provides a relative path to your source file(s).
         ${CPP_SOURCE}/player.cpp)
 
+add_library(editor SHARED ${CPP_SOURCE}/editor.cpp)
+
 
 # ==================================================
 # ffmpeg related headers
@@ -109,4 +111,15 @@ target_link_libraries(
         swresample
         swscale
         android
+)
+target_link_libraries(
+        editor
+        ${log-lib}
+        avcodec
+        avdevice
+        avfilter
+        avformat
+        avutil
+        swresample
+        swscale
 )

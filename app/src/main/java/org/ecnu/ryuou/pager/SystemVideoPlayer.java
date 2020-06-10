@@ -1,5 +1,6 @@
 package org.ecnu.ryuou.pager;
 
+
 import android.Manifest;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -21,7 +22,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
+import java.io.File;
+import java.util.Iterator;
+import java.util.TreeMap;
 import org.ecnu.ryuou.BaseActivity;
 import org.ecnu.ryuou.MainActivity;
 import org.ecnu.ryuou.R;
@@ -29,7 +32,8 @@ import org.ecnu.ryuou.SubtitleFileReader.ParseSrt;
 import org.ecnu.ryuou.player.Player;
 import org.ecnu.ryuou.player.PlayerController;
 import org.ecnu.ryuou.util.LogUtil;
-
+import org.ecnu.ryuou.SubtitleFileReader.SRT;
+import org.ecnu.ryuou.editor.Editor;
 import java.io.File;
 //implements android.view.View.OnClickListener
 public class SystemVideoPlayer extends BaseActivity implements android.view.View.OnClickListener  {
@@ -129,14 +133,20 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
               player.seekTo(10);
               player.start(new PlayerController.PlayerCallback() {
                   @Override
-                  public void onProgress(double current, double total) {
+                  public void onProgress(final double current, final double total) {
+                      runOnUiThread(new Runnable() {
+                          @Override
+                          public void run() {
+                              currentPosition = current;
+                              //     new ParseSrt().showSRT(currentPosition);
+                              totalPosition = total;
+                              seekbarVideo.setMax((int) total);
+                              //   LogUtil.d("Progress", String.format("current=%f,total=%f", currentPosition, total));
+                              tvDuration.setText(String.format("%.2f", total));
+                              handler.sendEmptyMessage(PROGRESS);
+                          }
+                      });
 
-                      currentPosition=  current;
-                      totalPosition =  total;
-                      seekbarVideo.setMax((int) total);
-//                      LogUtil.d("Progress", String.format("current=%f,total=%f", currentPosition, total));
-                      tvDuration.setText(String.format("%.2f",total));
-                      handler.sendEmptyMessage(PROGRESS);
                   }
               });
 
@@ -180,33 +190,18 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
 
 
 
-    private void setVideoType(int fullScreen) {
-       if(isnotFull){
-           isnotFull = !isnotFull;
-           surfaceView.setVideoSize(screenWidth,screenHeight);
-           setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-           btnVideoSwitchScreen.setBackgroundResource(R.drawable.jz_enlarge);
-       }
-       else{
-//           int mVideoWidth =110;
-//           int mvideoHeight = 50 ;
-//           int width = screenWidth;
-//           int height = screenHeight;
-//
-//           if(mvideoHeight*height<width*mvideoHeight){
-//               width=height*mVideoWidth/mvideoHeight;
-//           }
-//           else if(mVideoWidth*height>width*mvideoHeight){
-//               height = width*mvideoHeight/mVideoWidth;
-//           }
 
-//           surfaceView.setVideoSize(width,height);
-           surfaceView.setVideoSize(screenWidth,screenHeight);
-           setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-           btnVideoSwitchScreen.setBackgroundResource(R.drawable.jz_enlarge);
+
+    @Override
+    protected void onResume() {
+        /**
+         * 设置为横屏
+         */
+        if(getRequestedOrientation()!=ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE){
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
+        super.onResume();
     }
-
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -236,19 +231,19 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
         player = Player.getPlayer();
 
       //TODO:将字幕显示在activity_system_video_player的TextView，@+id/srtView
-       // ParseSrt test=new ParseSrt();
-        //test.parseSrt("C:\\Users\\huangqianru\\Desktop\\ruru.srt");
-      //  test.showSRT();
-      //TreeMap<Integer, SRT> srt_map=test.srt_map;
-      //Iterator<Integer> keys = srt_map.keySet().iterator();
-      //  while (keys.hasNext()) {
-      //text=(TextView)this.findViewById(R.id.srtView);
-      //  Integer key = keys.next();
-      //  SRT srtbean = srt_map.get(key);
-      //  text.setText(srtbean.getSrtBody());
-      //  System.out.println(srtbean
-      //         .getSrtBody());
-      // }
+        ParseSrt test = new ParseSrt();
+        test.parseSrt(Environment.getExternalStorageDirectory().getPath()
+                + File.separator + "Download" + File.separator + "test.srt");
+        // test.showSRT(currentPosition);
+        TreeMap<Integer, SRT> srt_map = test.srt_map;
+        Iterator<Integer> keys = srt_map.keySet().iterator();
+        while (keys.hasNext()) {
+            TextView text = (TextView) this.findViewById(R.id.srtView);
+            Integer key = keys.next();
+            SRT srtbean = srt_map.get(key);
+            text.setText(srtbean.getSrtBody());
+            System.out.println(srtbean.getSrtBody());
+        }
 
 
     }
@@ -284,6 +279,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
                 + File.separator + "Download" + File.separator + "test.mp4";
         double start = 10;
         double dest = 25;
+        Editor editor = Editor.getEditor();
         player.cut(videoPath, start, dest);
     }
 

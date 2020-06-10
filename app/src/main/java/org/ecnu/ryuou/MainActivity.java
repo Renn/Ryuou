@@ -11,6 +11,7 @@ import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.RadioGroup;
 import androidx.appcompat.widget.Toolbar;
@@ -18,10 +19,13 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import com.afollestad.materialdialogs.MaterialDialog;
+
 import java.io.File;
 import java.util.ArrayList;
 import org.ecnu.ryuou.base.BasePager;
 import org.ecnu.ryuou.base.ReplaceFragment;
+import org.ecnu.ryuou.editor.Editor;
 import org.ecnu.ryuou.menu.AboutActivity;
 import org.ecnu.ryuou.menu.SetActivity;
 import org.ecnu.ryuou.pager.ImagePager;
@@ -43,17 +47,29 @@ public class MainActivity extends BaseActivity {
   private ArrayList<BasePager> basePagers;
 
   private int position;
-
-  // for player test
+  /**
+   * for player test
+   */
   private SurfaceView surfaceView;
   private SurfaceHolder surfaceHolder;
   private Player player;
-
+  private Button btn1;//为cut按钮设定dialog监听事件
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-//    setContentView(R.layout.activity_main);
+    btn1=(Button) findViewById(R.id.cut);
+    btn1.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        new MaterialDialog.Builder(MainActivity.this)
+                .title("请输入截取的开始和结束时间")
+                .customView(R.layout.dialog, true)
+                .positiveText("确认")
+                .show();
+      }
+    });
+
     Toolbar toolbar = findViewById(R.id.文件夹);
     setSupportActionBar(toolbar);
 
@@ -76,37 +92,17 @@ public class MainActivity extends BaseActivity {
       ActivityCompat.requestPermissions(MainActivity.this,
           new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
     }
-
-    // for player test
+    /**
+     * for player test
+     */
     surfaceView = findViewById(R.id.surface_view);
     surfaceHolder = surfaceView.getHolder();
     player = Player.getPlayer();
-    /*
-    surfaceView.getHolder().addCallback(new SurfaceHolder.Callback() {
-        String videoPath = Environment.getExternalStorageDirectory().getPath()
-                + File.separator + "Download" + File.separator + "20200518171532.mp4";
-        //String videoPath = Environment.getExternalStorageDirectory().getPath()
-        //        + File.separator + "Download" + File.separator + "20200521135921.mp4";
-        // 确保调用 jni 方法时 Surface 已经被创建，避免 NullPointerException
-        @Override
-        public void surfaceCreated(SurfaceHolder holder) {
-            player.teststart(videoPath, holder.getSurface());
-        }
 
-        @Override
-        public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
-        }
-
-        @Override
-        public void surfaceDestroyed(SurfaceHolder holder) {
-
-        }
-    });*/
   }
 
   /**
-   *  for player test
+   * for player test
    */
   public void tryPlay(View view) {
     String videoPath = Environment.getExternalStorageDirectory().getPath()
@@ -124,14 +120,14 @@ public class MainActivity extends BaseActivity {
   }
 
   /**
-   *  for player test
+   * for player test
    */
   public void tryStop(View view) {
     player.stop();
   }
 
   /**
-   *  for player test
+   * for player test
    */
   public void tryCut(View view) {
     // permission request
@@ -145,8 +141,10 @@ public class MainActivity extends BaseActivity {
         + File.separator + "Download" + File.separator + "test.mp4";
     double start = 10;
     double dest = 25;
-    player.cut(videoPath, start, dest);
+    Editor editor = Editor.getEditor();
+    editor.cut(videoPath, start, dest);
   }
+
 
   private void setFragment() {
 //    android.app.FragmentManager manager = getFragmentManager();
