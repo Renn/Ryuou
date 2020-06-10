@@ -1,6 +1,5 @@
 package org.ecnu.ryuou.pager;
 
-
 import android.Manifest;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -22,19 +21,24 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import java.io.File;
-import java.util.Iterator;
-import java.util.TreeMap;
+import android.widget.RelativeLayout;
+import android.view.WindowManager;
+import android.view.GestureDetector;
+import android.media.AudioManager;
+import android.view.MotionEvent;
 import org.ecnu.ryuou.BaseActivity;
 import org.ecnu.ryuou.MainActivity;
 import org.ecnu.ryuou.R;
 import org.ecnu.ryuou.SubtitleFileReader.ParseSrt;
+import org.ecnu.ryuou.SubtitleFileReader.SRT;
 import org.ecnu.ryuou.player.Player;
 import org.ecnu.ryuou.player.PlayerController;
 import org.ecnu.ryuou.util.LogUtil;
-import org.ecnu.ryuou.SubtitleFileReader.SRT;
-import org.ecnu.ryuou.editor.Editor;
+
 import java.io.File;
+import java.util.Iterator;
+import java.util.TreeMap;
+
 //implements android.view.View.OnClickListener
 public class SystemVideoPlayer extends BaseActivity implements android.view.View.OnClickListener  {
 //    全屏
@@ -57,6 +61,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     private SeekBar seekbarVoice;
     private LinearLayout llBottom;
     private TextView tvCurrentTime;
+    private RelativeLayout media_controller;
     private SeekBar seekbarVideo;
     private TextView tvDuration;
     private Button btnExit;
@@ -72,6 +77,12 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     private boolean isnotPlay;
     private double currentPosition;
     private double totalPosition;
+    private AudioManager am;
+    private  int currentVoice;
+    private  int maxVoice;
+    private boolean isMute = false;
+    private boolean isshowMediaController = false;
+    private GestureDetector detector;
 ////    /**
 ////     * Find the Views in the layout<br />
 ////     * <br />
@@ -94,7 +105,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
         btnVideoStartPause = (Button)findViewById( R.id.btn_video_start_pause );
         btnVideoNext = (Button)findViewById( R.id.btn_video_next );
         btnVideoSwitchScreen = (Button)findViewById( R.id.btn_video_switch_screen );
-
+        media_controller=findViewById(R.id.media_controller);
         btnVoice.setOnClickListener( this );
 
         btnExit.setOnClickListener( this );
@@ -102,6 +113,58 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
         btnVideoStartPause.setOnClickListener( this );
         btnVideoNext.setOnClickListener( this );
         btnVideoSwitchScreen.setOnClickListener( this );
+        detector = new GestureDetector(this,new GestureDetector.SimpleOnGestureListener(){
+            @Override
+            public void onLongPress(MotionEvent e) {
+                super.onLongPress(e);
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+
+
+                if (isnotPlay) {
+                    btnVideoStartPause.setBackgroundResource(R.drawable.btn_pause_start_selector);
+                    String videoPath = Environment.getExternalStorageDirectory().getPath()
+                            + File.separator + "Download" + File.separator + "test.mp4";
+                    LogUtil.d("tryPlay", videoPath);
+                    isnotPlay = !isnotPlay;
+
+                    player.init(videoPath, surfaceHolder.getSurface());
+//              player.start();
+                    player.seekTo(10);
+                    player.start(new PlayerController.PlayerCallback() {
+                        @Override
+                        public void onProgress(double current, double total) {
+//TODO：进度条以及进度总时间随视频大小动态显示
+                            currentPosition = current;
+                            totalPosition = total;
+                            seekbarVideo.setMax((int) total);
+                            hideMediaController();
+//                      LogUtil.d("Progress", String.format("current=%f,total=%f", currentPosition, total));
+                            tvDuration.setText(String.format("%.2f", total));
+                            handler.sendEmptyMessage(PROGRESS);
+                        }
+                    });
+
+
+                }
+//        imageButton1.setVisibility(view.INVISIBLE);
+//        imageButton2.setVisibility(view.VISIBLE);
+                else {
+                    isnotPlay = !isnotPlay;
+                    player.stop();
+                    btnVideoStartPause.setBackgroundResource(R.drawable.btn_start_pause_selector);
+                }
+
+                return super.onDoubleTap(e);
+            }
+
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                return super.onSingleTapConfirmed(e);
+            }
+        });
     }
 
 ////    /**
@@ -113,6 +176,8 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     @Override
     public void onClick(View v) {
         if ( v == btnVoice ) {
+            isMute = !isMute;
+            updateVoice(currentVoice,isMute);
 //            // Handle clicks for btnVoice
         } else if ( v == btnExit ) {
 //            // Handle clicks for btnExit
@@ -133,20 +198,14 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
               player.seekTo(10);
               player.start(new PlayerController.PlayerCallback() {
                   @Override
-                  public void onProgress(final double current, final double total) {
-                      runOnUiThread(new Runnable() {
-                          @Override
-                          public void run() {
-                              currentPosition = current;
-                              //     new ParseSrt().showSRT(currentPosition);
-                              totalPosition = total;
-                              seekbarVideo.setMax((int) total);
-                              //   LogUtil.d("Progress", String.format("current=%f,total=%f", currentPosition, total));
-                              tvDuration.setText(String.format("%.2f", total));
-                              handler.sendEmptyMessage(PROGRESS);
-                          }
-                      });
+                  public void onProgress(double current, double total) {
 
+                      currentPosition=  current;
+                      totalPosition =  total;
+                      seekbarVideo.setMax((int) total);
+//                      LogUtil.d("Progress", String.format("current=%f,total=%f", currentPosition, total));
+                      tvDuration.setText(String.format("%.2f",total));
+                      handler.sendEmptyMessage(PROGRESS);
                   }
               });
 
@@ -155,6 +214,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
 //        imageButton1.setVisibility(view.INVISIBLE);
 //        imageButton2.setVisibility(view.VISIBLE);
             else{
+              isnotPlay = !isnotPlay;
                 player.stop();
               btnVideoStartPause.setBackgroundResource(R.drawable.btn_start_pause_selector);
           }
@@ -187,21 +247,160 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
             }
         }
     };
-
-
-
-
-
-    @Override
-    protected void onResume() {
-        /**
-         * 设置为横屏
-         */
-        if(getRequestedOrientation()!=ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE){
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+    public void setBrightness(float brightness) {
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.screenBrightness = lp.screenBrightness + brightness / 255.0f;
+        if (lp.screenBrightness > 1) {
+            lp.screenBrightness = 1;
+        } else if (lp.screenBrightness < 0.1) {
+            lp.screenBrightness = (float) 0.1;
         }
-        super.onResume();
+        getWindow().setAttributes(lp);
+
+        float sb = lp.screenBrightness;
+//            brightnessTextView.setText((int) Math.ceil(sb * 100) + "%");
     }
+    private float startY;
+    private float startX;
+    private float touchRang;
+    private int mVol;
+    @Override
+    public boolean onTouchEvent(MotionEvent event){
+        detector.onTouchEvent(event);
+
+        switch (event.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                startY = event.getY();
+                startX = event.getX();
+                mVol = am.getStreamVolume(AudioManager.STREAM_MUSIC);
+                touchRang=Math.min(screenHeight,screenWidth);
+//                handler.removeMessages(HIDE_MEDIACONTROLLER);
+                break;
+            case MotionEvent.ACTION_MOVE:
+                float endY = event.getY();
+                float distanceY = startY-endY;
+                if(startX > screenWidth / 2){
+                    float delta = (distanceY/touchRang)*maxVoice;
+                    int voice = (int)Math.min(Math.max(mVol+delta,0),maxVoice);
+                    if(delta!=0){
+                        isMute = false;
+                        updateVoice(voice,false);
+                    }}
+                else {
+                    final double FLING_MIN_DISTANCE = 0.5;
+                    final double FLING_MIN_VELOCITY = 0.5;
+                    if (distanceY > FLING_MIN_DISTANCE && Math.abs(distanceY) > FLING_MIN_VELOCITY) {
+                        setBrightness(10);
+                    }
+                    if (distanceY < FLING_MIN_DISTANCE && Math.abs(distanceY) > FLING_MIN_VELOCITY) {
+                        setBrightness(-10);
+                    }
+                }
+
+                break;
+            case MotionEvent.ACTION_UP:
+//                handler.removeMessages(HIDE_MEDIACONTROLLER,4000);
+                break;
+        }
+
+        return super.onTouchEvent(event);
+    }
+
+    private void setListener(){
+        seekbarVideo.setOnSeekBarChangeListener(new VideoOnSeekBarChangeListener());
+        seekbarVoice.setOnSeekBarChangeListener(new VoiceOnSeekBarChangeListener());
+    }
+    class VoiceOnSeekBarChangeListener implements SeekBar.OnSeekBarChangeListener{
+
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            if(fromUser){
+                if(progress>0){
+                    isMute = false;
+                }
+                else{
+                    isMute = true;
+                }
+                updateVoice(progress,isMute);
+            }
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+//            handler.removeMessages(HIDE_MESIACONTROLLER,4000);
+
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+
+        }
+    }
+
+    private void updateVoice(int progress,boolean isMute) {
+        if(isMute){
+            am.setStreamVolume(AudioManager.STREAM_MUSIC,0,0);
+            seekbarVoice.setProgress(0);
+        }
+        else{
+            am.setStreamVolume(AudioManager.STREAM_MUSIC,progress,0);
+            seekbarVoice.setProgress(progress);
+            currentVoice=progress;
+        }
+
+    }
+
+    class VideoOnSeekBarChangeListener implements SeekBar.OnSeekBarChangeListener{
+
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            if(fromUser){
+                player.seekTo(progress);
+//                zhuyi
+//                tvCurrentTime.setText(String.format("%.2f",progress));
+            }
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+
+        }
+    }
+
+
+
+        private void setVideoType(int fullScreen) {
+       if(isnotFull){
+           isnotFull = !isnotFull;
+           surfaceView.setVideoSize(screenWidth,screenHeight);
+           setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+           btnVideoSwitchScreen.setBackgroundResource(R.drawable.jz_enlarge);
+       }
+       else{
+//           int mVideoWidth =110;
+//           int mvideoHeight = 50 ;
+//           int width = screenWidth;
+//           int height = screenHeight;
+//
+//           if(mvideoHeight*height<width*mvideoHeight){
+//               width=height*mVideoWidth/mvideoHeight;
+//           }
+//           else if(mVideoWidth*height>width*mvideoHeight){
+//               height = width*mvideoHeight/mVideoWidth;
+//           }
+
+//           surfaceView.setVideoSize(width,height);
+           surfaceView.setVideoSize(screenWidth,screenHeight);
+           setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+           btnVideoSwitchScreen.setBackgroundResource(R.drawable.jz_enlarge);
+        }
+    }
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -225,25 +424,31 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         screenWidth=displayMetrics.widthPixels;
         screenHeight=displayMetrics.heightPixels;
+            am = (AudioManager) getSystemService(AUDIO_SERVICE);
+            currentVoice = am.getStreamVolume(AudioManager.STREAM_MUSIC);
+            maxVoice = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+            seekbarVoice.setMax(maxVoice);
+            seekbarVoice.setProgress(currentVoice);
+            setListener();
 
         surfaceView = findViewById(R.id.surface_view);
         surfaceHolder = surfaceView.getHolder();
         player = Player.getPlayer();
 
       //TODO:将字幕显示在activity_system_video_player的TextView，@+id/srtView
-        ParseSrt test = new ParseSrt();
-        test.parseSrt(Environment.getExternalStorageDirectory().getPath()
-                + File.separator + "Download" + File.separator + "test.srt");
-        // test.showSRT(currentPosition);
-        TreeMap<Integer, SRT> srt_map = test.srt_map;
-        Iterator<Integer> keys = srt_map.keySet().iterator();
-        while (keys.hasNext()) {
-            TextView text = (TextView) this.findViewById(R.id.srtView);
-            Integer key = keys.next();
-            SRT srtbean = srt_map.get(key);
-            text.setText(srtbean.getSrtBody());
-            System.out.println(srtbean.getSrtBody());
-        }
+            ParseSrt test = new ParseSrt();
+            test.parseSrt(Environment.getExternalStorageDirectory().getPath()
+                    + File.separator + "Download" + File.separator + "test.srt");
+            // test.showSRT(currentPosition);
+            TreeMap<Integer, SRT> srt_map = test.srt_map;
+            Iterator<Integer> keys = srt_map.keySet().iterator();
+            while (keys.hasNext()) {
+                TextView text = (TextView) this.findViewById(R.id.srtView);
+                Integer key = keys.next();
+                SRT srtbean = srt_map.get(key);
+                text.setText(srtbean.getSrtBody());
+                System.out.println(srtbean.getSrtBody());
+            }
 
 
     }
@@ -279,10 +484,21 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
                 + File.separator + "Download" + File.separator + "test.mp4";
         double start = 10;
         double dest = 25;
-        Editor editor = Editor.getEditor();
+            Editor editor = Editor.getEditor();
         player.cut(videoPath, start, dest);
     }
 
+
+//    隐藏
+
+        private void showMediaController(){
+            media_controller.setVisibility(surfaceView.VISIBLE);
+            isshowMediaController=true;
+        }
+        private void hideMediaController(){
+            media_controller.setVisibility(surfaceView.GONE);
+            isshowMediaController=false;
+        }
 
 
 //
