@@ -62,11 +62,11 @@ public class VideoPager extends BasePager {
     super(context);
   }
 
-//  time
-    public String getSystemTime(){
-        SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
-        return format.format(new Date());
-    }
+  //  time
+  public String getSystemTime(){
+    SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
+    return format.format(new Date());
+  }
 
 
 
@@ -86,24 +86,24 @@ public class VideoPager extends BasePager {
     return view;
   }
   class myIXListViewListener implements XListView.IXListViewListener{
-      @Override
-      public void onRefresh() {
-          getDataFromLocal();
+    @Override
+    public void onRefresh() {
+      getDataFromLocal();
 
-      }
+    }
 
-      @Override
-      public void onLoadMore() {
+    @Override
+    public void onLoadMore() {
 
-      }
+    }
   }
 
 
-    private void onLoad() {
-        listview.stopRefresh();
-        listview.stopLoadMore();
-        listview.setRefreshTime("更新时间："+getSystemTime());
-    }
+  private void onLoad() {
+    listview.stopRefresh();
+    listview.stopLoadMore();
+    listview.setRefreshTime("更新时间："+getSystemTime());
+  }
 
   @Override
   public void initData() {

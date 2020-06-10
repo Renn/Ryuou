@@ -5,6 +5,8 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.util.DisplayMetrics;
 import android.view.SurfaceHolder;
 //import android.view.SurfaceView;
@@ -15,13 +17,17 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import org.ecnu.ryuou.BaseActivity;
+import org.ecnu.ryuou.MainActivity;
 import org.ecnu.ryuou.R;
+import org.ecnu.ryuou.SubtitleFileReader.ParseSrt;
 import org.ecnu.ryuou.player.Player;
+import org.ecnu.ryuou.player.PlayerController;
 import org.ecnu.ryuou.util.LogUtil;
 
 import java.io.File;
@@ -30,6 +36,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
 //    全屏
 
     private static final int FULL_SCREEN =1 ;
+    private static final int PROGRESS = 1;
 
     static {
         System.loadLibrary("player");
@@ -53,10 +60,14 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     private Button btnVideoPre;
     private Button btnVideoStartPause;
     private Button btnVideoNext;
+//    private  double current;
+//    private  double total;
     private Button btnVideoSwitchScreen;
     private int screenWidth = 0;
     private int screenHeight = 0;
     private boolean isnotPlay;
+    private double currentPosition;
+    private double totalPosition;
 ////    /**
 ////     * Find the Views in the layout<br />
 ////     * <br />
@@ -114,7 +125,22 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
               isnotPlay = !isnotPlay;
 
               player.init(videoPath, surfaceHolder.getSurface());
-              player.start();
+//              player.start();
+              player.seekTo(10);
+              player.start(new PlayerController.PlayerCallback() {
+                  @Override
+                  public void onProgress(double current, double total) {
+
+                      currentPosition=  current;
+                      totalPosition =  total;
+                      seekbarVideo.setMax((int) total);
+//                      LogUtil.d("Progress", String.format("current=%f,total=%f", currentPosition, total));
+                      tvDuration.setText(String.format("%.2f",total));
+                      handler.sendEmptyMessage(PROGRESS);
+                  }
+              });
+
+
           }
 //        imageButton1.setVisibility(view.INVISIBLE);
 //        imageButton2.setVisibility(view.VISIBLE);
@@ -132,6 +158,27 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
             
         }
     }
+
+    private Handler handler = new Handler(){
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                case PROGRESS:
+                    seekbarVideo.setProgress((int) currentPosition);
+
+                    LogUtil.d("Progress", String.format("current=%f,total=%f,%d", currentPosition, totalPosition,
+                            PROGRESS));
+                    tvCurrentTime.setText(String.format("%.2f",currentPosition));
+                    removeMessages(PROGRESS);
+                    sendEmptyMessageDelayed(PROGRESS,1000);
+                    break;
+
+            }
+        }
+    };
+
+
 
     private void setVideoType(int fullScreen) {
        if(isnotFull){
@@ -188,23 +235,57 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
         surfaceHolder = surfaceView.getHolder();
         player = Player.getPlayer();
 
+      //TODO:将字幕显示在activity_system_video_player的TextView，@+id/srtView
+       // ParseSrt test=new ParseSrt();
+        //test.parseSrt("C:\\Users\\huangqianru\\Desktop\\ruru.srt");
+      //  test.showSRT();
+      //TreeMap<Integer, SRT> srt_map=test.srt_map;
+      //Iterator<Integer> keys = srt_map.keySet().iterator();
+      //  while (keys.hasNext()) {
+      //text=(TextView)this.findViewById(R.id.srtView);
+      //  Integer key = keys.next();
+      //  SRT srtbean = srt_map.get(key);
+      //  text.setText(srtbean.getSrtBody());
+      //  System.out.println(srtbean
+      //         .getSrtBody());
+      // }
+
 
     }
 
 
-  public void tryPlay(View view) {
-    String videoPath = Environment.getExternalStorageDirectory().getPath()
-        + File.separator + "Download" + File.separator + "test.mp4";
-    LogUtil.d("tryPlay", videoPath);
-//    surfaceView.setVideoSize(100,200);
-    player.init(videoPath, surfaceHolder.getSurface());
-    player.start();
-  }
+    public void tryPlay(View view) {
+        String videoPath = Environment.getExternalStorageDirectory().getPath()
+                + File.separator + "Download" + File.separator + "test.mp4";
+        LogUtil.d("tryPlay", videoPath);
+        player.init(videoPath, surfaceHolder.getSurface());
+        player.seekTo(20);
+        player.start(new PlayerController.PlayerCallback() {
+            @Override
+            public void onProgress(double current, double total) {
+                LogUtil.d("Progress", String.format("current=%f,total=%f", current, total));
+            }
+        });
+//    player.seekTo(20);
+    }
 
   public void tryStop(View view) {
     player.stop();
   }
-
+    public void tryCut(View view) {
+        // permission request
+        if (ContextCompat
+                .checkSelfPermission(SystemVideoPlayer.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(SystemVideoPlayer.this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+        }
+        String videoPath = Environment.getExternalStorageDirectory().getPath()
+                + File.separator + "Download" + File.separator + "test.mp4";
+        double start = 10;
+        double dest = 25;
+        player.cut(videoPath, start, dest);
+    }
 
 
 
