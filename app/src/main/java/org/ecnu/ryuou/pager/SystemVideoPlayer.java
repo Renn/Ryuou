@@ -76,6 +76,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     private int screenHeight = 0;
     private boolean isnotPlay;
     private double currentPosition;
+    private double stop;
     private double totalPosition;
     private AudioManager am;
     private  int currentVoice;
@@ -92,8 +93,8 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     private void findViews() {
         llTop = (LinearLayout)findViewById( R.id.ll_top );
         tvName = (TextView)findViewById( R.id.tv_name );
-        ivBattery = (ImageView)findViewById( R.id.iv_battery );
-        tvSystemTime = (TextView)findViewById( R.id.tv_system_time );
+//        ivBattery = (ImageView)findViewById( R.id.iv_battery );
+//        tvSystemTime = (TextView)findViewById( R.id.tv_system_time );
         btnVoice = (Button)findViewById( R.id.btn_voice );
         seekbarVoice = (SeekBar)findViewById( R.id.seekbar_voice );
         llBottom = (LinearLayout)findViewById( R.id.ll_bottom );
@@ -104,15 +105,15 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
         btnVideoPre = (Button)findViewById( R.id.btn_video_pre );
         btnVideoStartPause = (Button)findViewById( R.id.btn_video_start_pause );
         btnVideoNext = (Button)findViewById( R.id.btn_video_next );
-        btnVideoSwitchScreen = (Button)findViewById( R.id.btn_video_switch_screen );
-        media_controller=findViewById(R.id.media_controller);
+//        btnVideoSwitchScreen = (Button)findViewById( R.id.btn_video_switch_screen );
+//        media_controller=findViewById(R.id.media_controller);
         btnVoice.setOnClickListener( this );
 
         btnExit.setOnClickListener( this );
         btnVideoPre.setOnClickListener( this );
         btnVideoStartPause.setOnClickListener( this );
         btnVideoNext.setOnClickListener( this );
-        btnVideoSwitchScreen.setOnClickListener( this );
+//        btnVideoSwitchScreen.setOnClickListener( this );
         detector = new GestureDetector(this,new GestureDetector.SimpleOnGestureListener(){
             @Override
             public void onLongPress(MotionEvent e) {
@@ -121,9 +122,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
 
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-
-
-                if (isnotPlay) {
+                if(isnotPlay){
                     btnVideoStartPause.setBackgroundResource(R.drawable.btn_pause_start_selector);
                     String videoPath = Environment.getExternalStorageDirectory().getPath()
                             + File.separator + "Download" + File.separator + "test.mp4";
@@ -132,17 +131,16 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
 
                     player.init(videoPath, surfaceHolder.getSurface());
 //              player.start();
-                    player.seekTo(10);
+                    player.seekTo(currentPosition);
                     player.start(new PlayerController.PlayerCallback() {
                         @Override
                         public void onProgress(double current, double total) {
-//TODO：进度条以及进度总时间随视频大小动态显示
-                            currentPosition = current;
-                            totalPosition = total;
+
+                            currentPosition=  current;
+                            totalPosition =  total;
                             seekbarVideo.setMax((int) total);
-                            hideMediaController();
 //                      LogUtil.d("Progress", String.format("current=%f,total=%f", currentPosition, total));
-                            tvDuration.setText(String.format("%.2f", total));
+                            tvDuration.setText(String.format("%.2f",total));
                             handler.sendEmptyMessage(PROGRESS);
                         }
                     });
@@ -151,13 +149,14 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
                 }
 //        imageButton1.setVisibility(view.INVISIBLE);
 //        imageButton2.setVisibility(view.VISIBLE);
-                else {
+                else{
                     isnotPlay = !isnotPlay;
                     player.stop();
+
                     btnVideoStartPause.setBackgroundResource(R.drawable.btn_start_pause_selector);
                 }
-
-                return super.onDoubleTap(e);
+                return false;
+//                return super.onDoubleTap(e);
             }
 
             @Override
@@ -195,7 +194,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
 
               player.init(videoPath, surfaceHolder.getSurface());
 //              player.start();
-              player.seekTo(10);
+              player.seekTo(currentPosition);
               player.start(new PlayerController.PlayerCallback() {
                   @Override
                   public void onProgress(double current, double total) {
@@ -216,6 +215,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
             else{
               isnotPlay = !isnotPlay;
                 player.stop();
+
               btnVideoStartPause.setBackgroundResource(R.drawable.btn_start_pause_selector);
           }
 
@@ -484,8 +484,8 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
                 + File.separator + "Download" + File.separator + "test.mp4";
         double start = 10;
         double dest = 25;
-            Editor editor = Editor.getEditor();
-        player.cut(videoPath, start, dest);
+//            Editor editor = Editor.getEditor();
+//        player.cut(videoPath, start, dest);
     }
 
 
