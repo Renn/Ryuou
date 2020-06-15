@@ -206,6 +206,7 @@ class VideoPagerAdapter extends BaseAdapter {
     }
     MediaItem mediaItem = mediaItems.get(position);
     viewHolder.tv_name.setText(mediaItem.getName());
+    viewHolder.tv_time.setText(String.valueOf(mediaItem.getDuration() / 1000.0));
 //        viewHolder.tv_size.setText((int) mediaItem.getDuration());
     viewHolder.tv_size.setText(Formatter.formatFileSize(context, mediaItem.getSize()));
     return convertView;

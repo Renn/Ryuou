@@ -69,7 +69,7 @@ struct Temp {
   AVFrame *frame = NULL;
   AVFrame *rgba_frame = NULL;
   uint8_t *audio_out_buffer = NULL;
-  /*
+  /**
    * For subtitle.
    */
   AVFrame *filter_frame = NULL;
@@ -413,7 +413,9 @@ void initSubtitleFilter(char *subtitle_filename) {
   player_info.input->filter_ctx = player_info.buffersink_context;
 
   // TODO：parse string 不成功
-  char filter_desc2[80] = "subtitles=\\\/storage\\\/emulated\\\/0\\\/Download\\\/test.srt:original_size=960x544";
+//  char filter_desc2[80] = "subtitles=/storage/emulated/0/Download/test.srt:original_size=960x540";
+  char filter_desc2[100] =
+      "subtitles=filename='/storage/emulated/0/Download/test.srt':original_size=960x540";
   int result = avfilter_graph_parse_ptr(player_info.filter_graph, filter_desc2,
                                &(player_info.output), &(player_info.input), NULL);
   if (result < 0) {
@@ -488,8 +490,8 @@ void *play_thread(void *args) {
   long long video_count = 0;
   long long audio_count = 0;
 
-  //char subtitle_filename[50] = "/storage/emulated/0/Download/test.srt";
-  //initSubtitleFilter(player_info.buffersrcContext, player_info.buffersinkContext, subtitle_filename);
+//  char subtitle_filename[50] = "/storage/emulated/0/Download/test.srt";
+//  initSubtitleFilter(subtitle_filename);
 
 
   // 播放
