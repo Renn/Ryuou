@@ -35,13 +35,6 @@ public class Player implements PlayerController {
     return ErrorCode.SUCCESS;
   }
 
-  /**
-   * Do nothing. For temporary compatibility only.
-   */
-  public ErrorCode start() {
-    return null;
-  }
-
   @Override
   public ErrorCode start(PlayerCallback callback) {
     playByNative(callback);

@@ -24,10 +24,12 @@ import java.util.Date;
 import org.ecnu.ryuou.R;
 import org.ecnu.ryuou.base.BasePager;
 import org.ecnu.ryuou.domain.MediaItem;
+import org.ecnu.ryuou.util.LogUtil;
 //import org.ecnu.ryuou.player.Player;
 
 public class VideoPager extends BasePager {
 
+  private static final String TAG = "VideoPager";
   private XListView listview;
   private TextView tv_nomedia;
   private ProgressBar pb_loading;
@@ -154,6 +156,8 @@ public class VideoPager extends BasePager {
 //      调起播放器
       Intent intent = new Intent(context, SystemVideoPlayer.class);
       intent.setDataAndType(Uri.parse(mediaItem.getData()), "video/*");
+      LogUtil.d(TAG, "mediaItem.getData()=" + mediaItem.getData());
+      LogUtil.d(TAG, "URI.toString()=" + Uri.parse(mediaItem.getData()));
       context.startActivity(intent);
     }
   }

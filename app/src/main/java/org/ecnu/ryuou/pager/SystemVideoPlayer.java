@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -39,7 +40,7 @@ import org.ecnu.ryuou.util.LogUtil;
 
 public class SystemVideoPlayer extends BaseActivity implements android.view.View.OnClickListener {
 //    全屏
-
+private static final String TAG = "SystemVideoPlayer";
   private static final int FULL_SCREEN = 1;
   private static final int PROGRESS = 1;
 
@@ -106,13 +107,8 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
   private float touchRang;
   private int mVol;
 
-  ////    /**
-////     * Find the Views in the layout<br />
-////     * <br />
-////     * Auto-created on 2020-05-28 00:08:02 by Android Layout Finder
-////     * (http://www.buzzingandroid.com/tools/android-layout-finder)
-////     */
   private void findViews() {
+    surfaceView = findViewById(R.id.surface_view);
     llTop = findViewById(R.id.ll_top);
     tvName = findViewById(R.id.tv_name);
 //        ivBattery = (ImageView)findViewById( R.id.iv_battery );
@@ -361,10 +357,6 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     seekbarVoice.setProgress(currentVoice);
     setListener();
 
-    surfaceView = findViewById(R.id.surface_view);
-    surfaceHolder = surfaceView.getHolder();
-    player = Player.getPlayer();
-
     //TODO:将字幕显示在activity_system_video_player的TextView，@+id/srtView
     ParseSrt test = new ParseSrt();
     test.parseSrt(Environment.getExternalStorageDirectory().getPath()
@@ -383,7 +375,25 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
 
   }
 
-//  public void tryPlay(View view) {
+  @Override
+  protected void onResume() {
+    super.onResume();
+    surfaceHolder = surfaceView.getHolder();
+    player = Player.getPlayer();
+    Uri uri = getIntent().getData();
+    if (uri != null) {
+      player.init(uri.toString(), surfaceHolder.getSurface());
+      LogUtil.d(TAG, "url=" + uri);
+      //todo: "Player Error : Can not create native window"
+//      player.start(new PlayerCallback() {
+//        @Override
+//        public void onProgress(double current, double total) {
+//
+//        }
+//      });
+    }
+  }
+  //  public void tryPlay(View view) {
 //    String videoPath = Environment.getExternalStorageDirectory().getPath()
 //        + File.separator + "Download" + File.separator + "test.mp4";
 //    LogUtil.d("tryPlay", videoPath);
