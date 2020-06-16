@@ -1,4 +1,7 @@
 package org.ecnu.ryuou.domain;
+
+import java.util.Locale;
+
 //代表视频音频
 public class MediaItem {
     private String name;
@@ -22,6 +25,17 @@ public class MediaItem {
     public void setDuration(long duration) {
         this.duration = duration;
     }
+
+  public String getFormattedDuration() {
+    long temp = this.duration;
+    int microSec = (int) (temp % 1000);
+    temp /= 1000;
+    int sec = (int) (temp % 60);
+    temp /= 60;
+    int min = (int) (temp % 60);
+    temp /= 60;
+    return String.format(Locale.CHINA, "%d:%d:%d.%d", temp, min, sec, microSec);
+  }
 
     public long getSize() {
         return size;

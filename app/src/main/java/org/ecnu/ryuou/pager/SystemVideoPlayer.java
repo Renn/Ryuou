@@ -32,14 +32,11 @@ import org.ecnu.ryuou.BaseActivity;
 import org.ecnu.ryuou.R;
 import org.ecnu.ryuou.SubtitleFileReader.ParseSrt;
 import org.ecnu.ryuou.SubtitleFileReader.SRT;
-import org.ecnu.ryuou.editor.Editor;
 import org.ecnu.ryuou.player.Player;
 import org.ecnu.ryuou.player.PlayerController;
 import org.ecnu.ryuou.util.LogUtil;
 
-//import android.view.SurfaceView;
 
-//implements android.view.View.OnClickListener
 public class SystemVideoPlayer extends BaseActivity implements android.view.View.OnClickListener {
 //    全屏
 
@@ -127,17 +124,17 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     seekbarVideo = findViewById(R.id.seekbar_video);
     tvDuration = findViewById(R.id.tv_duration);
     btnExit = findViewById(R.id.btn_exit);
-    btnVideoPre = findViewById(R.id.btn_video_pre);
+//    btnVideoPre = findViewById(R.id.btn_video_pre);
     btnVideoStartPause = findViewById(R.id.btn_video_start_pause);
-    btnVideoNext = findViewById(R.id.btn_video_next);
+//    btnVideoNext = findViewById(R.id.btn_video_next);
 //        btnVideoSwitchScreen = (Button)findViewById( R.id.btn_video_switch_screen );
 //        media_controller=findViewById(R.id.media_controller);
     btnVoice.setOnClickListener(this);
 
     btnExit.setOnClickListener(this);
-    btnVideoPre.setOnClickListener(this);
+//    btnVideoPre.setOnClickListener(this);
     btnVideoStartPause.setOnClickListener(this);
-    btnVideoNext.setOnClickListener(this);
+//    btnVideoNext.setOnClickListener(this);
 //        btnVideoSwitchScreen.setOnClickListener( this );
     detector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
       @Override
@@ -169,8 +166,6 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
               handler.sendEmptyMessage(PROGRESS);
             }
           });
-
-
         }
 //        imageButton1.setVisibility(view.INVISIBLE);
 //        imageButton2.setVisibility(view.VISIBLE);
@@ -190,65 +185,50 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     });
   }
 
-  ////    /**
-////     * Handle button click events<br />
-////     * <br />
-////     * Auto-created on 2020-05-28 00:08:02 by Android Layout Finder
-////     * (http://www.buzzingandroid.com/tools/android-layout-finder)
-////     */
   @Override
   public void onClick(View v) {
-    if (v == btnVoice) {
-      isMute = !isMute;
-      updateVoice(currentVoice, isMute);
-//            // Handle clicks for btnVoice
-    } else if (v == btnExit) {
-//            // Handle clicks for btnExit
-    } else if (v == btnVideoPre) {
-//            // Handle clicks for btnVideoPre
-    } else if (v == btnVideoStartPause) {
-//            // Handle clicks for btnVideoStartPause
-//            surfaceView.setVideoSize(100,200);
-      if (isnotPlay) {
-        btnVideoStartPause.setBackgroundResource(R.drawable.btn_pause_start_selector);
-        String videoPath = Environment.getExternalStorageDirectory().getPath()
-            + File.separator + "Download" + File.separator + "test.mp4";
-        LogUtil.d("tryPlay", videoPath);
-        isnotPlay = !isnotPlay;
+    switch (v.getId()) {
+      case R.id.btn_voice:
+        isMute = !isMute;
+        updateVoice(currentVoice, isMute);
+        break;
+      case R.id.btn_video_start_pause:
+        if (isnotPlay) {
+          btnVideoStartPause.setBackgroundResource(R.drawable.btn_pause_start_selector);
+          String videoPath = Environment.getExternalStorageDirectory().getPath()
+              + File.separator + "Download" + File.separator + "test.mp4";
+          LogUtil.d("tryPlay", videoPath);
+          isnotPlay = !isnotPlay;
 
-        player.init(videoPath, surfaceHolder.getSurface());
+          player.init(videoPath, surfaceHolder.getSurface());
 //              player.start();
-        player.seekTo(currentPosition);
-        player.start(new PlayerController.PlayerCallback() {
-          @Override
-          public void onProgress(double current, double total) {
+          player.seekTo(currentPosition);
+          player.start(new PlayerController.PlayerCallback() {
+            @Override
+            public void onProgress(double current, double total) {
 
-            currentPosition = current;
-            totalPosition = total;
-            seekbarVideo.setMax((int) total);
+              currentPosition = current;
+              totalPosition = total;
+              seekbarVideo.setMax((int) total);
 //                      LogUtil.d("Progress", String.format("current=%f,total=%f", currentPosition, total));
-            tvDuration.setText(String.format("%.2f", total));
-            handler.sendEmptyMessage(PROGRESS);
-          }
-        });
-
-
-      }
+              tvDuration.setText(String.format("%.2f", total));
+              handler.sendEmptyMessage(PROGRESS);
+            }
+          });
+        }
 //        imageButton1.setVisibility(view.INVISIBLE);
 //        imageButton2.setVisibility(view.VISIBLE);
-      else {
-        isnotPlay = !isnotPlay;
-        player.stop();
-        btnVideoStartPause.setBackgroundResource(R.drawable.btn_start_pause_selector);
-      }
-
-
-    } else if (v == btnVideoNext) {
-      // Handle clicks for btnVideoNext
-    } else if (v == btnVideoSwitchScreen) {
-      // Handle clicks for btnVideoSwitchScreen
-      setVideoType(FULL_SCREEN);
-
+        else {
+          isnotPlay = true;
+          player.stop();
+          btnVideoStartPause.setBackgroundResource(R.drawable.btn_start_pause_selector);
+        }
+        break;
+      case R.id.btn_exit:
+        onBackPressed();
+        break;
+      default:
+        break;
     }
   }
 
@@ -403,40 +383,40 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
 
   }
 
-  public void tryPlay(View view) {
-    String videoPath = Environment.getExternalStorageDirectory().getPath()
-        + File.separator + "Download" + File.separator + "test.mp4";
-    LogUtil.d("tryPlay", videoPath);
-    player.init(videoPath, surfaceHolder.getSurface());
-    player.seekTo(20);
-    player.start(new PlayerController.PlayerCallback() {
-      @Override
-      public void onProgress(double current, double total) {
-        LogUtil.d("Progress", String.format("current=%f,total=%f", current, total));
-      }
-    });
+//  public void tryPlay(View view) {
+//    String videoPath = Environment.getExternalStorageDirectory().getPath()
+//        + File.separator + "Download" + File.separator + "test.mp4";
+//    LogUtil.d("tryPlay", videoPath);
+//    player.init(videoPath, surfaceHolder.getSurface());
 //    player.seekTo(20);
-  }
-
-  public void tryStop(View view) {
-    player.stop();
-  }
-
-  public void tryCut(View view) {
-    // permission request
-    if (ContextCompat
-        .checkSelfPermission(SystemVideoPlayer.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-        != PackageManager.PERMISSION_GRANTED) {
-      ActivityCompat.requestPermissions(SystemVideoPlayer.this,
-          new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-    }
-    String videoPath = Environment.getExternalStorageDirectory().getPath()
-        + File.separator + "Download" + File.separator + "test.mp4";
-    double start = 10;
-    double dest = 25;
-    Editor editor = Editor.getEditor();
-    editor.cut(videoPath, start, dest);
-  }
+//    player.start(new PlayerController.PlayerCallback() {
+//      @Override
+//      public void onProgress(double current, double total) {
+//        LogUtil.d("Progress", String.format("current=%f,total=%f", current, total));
+//      }
+//    });
+////    player.seekTo(20);
+//  }
+//
+//  public void tryStop(View view) {
+//    player.stop();
+//  }
+//
+//  public void tryCut(View view) {
+//    // permission request
+//    if (ContextCompat
+//        .checkSelfPermission(SystemVideoPlayer.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+//        != PackageManager.PERMISSION_GRANTED) {
+//      ActivityCompat.requestPermissions(SystemVideoPlayer.this,
+//          new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+//    }
+//    String videoPath = Environment.getExternalStorageDirectory().getPath()
+//        + File.separator + "Download" + File.separator + "test.mp4";
+//    double start = 10;
+//    double dest = 25;
+//    Editor editor = Editor.getEditor();
+//    editor.cut(videoPath, start, dest);
+//  }
 
   private void showMediaController() {
     media_controller.setVisibility(View.VISIBLE);
@@ -478,22 +458,16 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
       if (fromUser) {
         player.seekTo(progress);
-//                zhuyi
-//                tvCurrentTime.setText(String.format("%.2f",progress));
       }
     }
 
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
-
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-
     }
   }
-
-//
 }
 

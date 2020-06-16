@@ -17,7 +17,6 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -74,7 +73,7 @@ public class VideoPager extends BasePager {
     pb_loading = view.findViewById(R.id.pb_loading);
 //        设置item点击事件
     listview.setOnItemClickListener(new MyOnItemClickListener());
-    listview.setPullLoadEnable(true);
+    listview.setPullLoadEnable(false);
     listview.setXListViewListener(new myIXListViewListener());
     return view;
   }
@@ -151,13 +150,11 @@ public class VideoPager extends BasePager {
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
       MediaItem mediaItem = mediaItems.get(position - 1);
-      Toast.makeText(context, "mediaItem==" + mediaItem.toString(), Toast.LENGTH_SHORT).show();
+//      Toast.makeText(context, "mediaItem==" + mediaItem.toString(), Toast.LENGTH_SHORT).show();
 //      调起播放器
       Intent intent = new Intent(context, SystemVideoPlayer.class);
       intent.setDataAndType(Uri.parse(mediaItem.getData()), "video/*");
       context.startActivity(intent);
-
-
     }
   }
 
@@ -206,7 +203,7 @@ class VideoPagerAdapter extends BaseAdapter {
     }
     MediaItem mediaItem = mediaItems.get(position);
     viewHolder.tv_name.setText(mediaItem.getName());
-    viewHolder.tv_time.setText(String.valueOf(mediaItem.getDuration() / 1000.0));
+    viewHolder.tv_time.setText(mediaItem.getFormattedDuration());
 //        viewHolder.tv_size.setText((int) mediaItem.getDuration());
     viewHolder.tv_size.setText(Formatter.formatFileSize(context, mediaItem.getSize()));
     return convertView;

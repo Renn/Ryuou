@@ -22,6 +22,7 @@ import org.ecnu.ryuou.menu.SetActivity;
 import org.ecnu.ryuou.pager.ImagePager;
 import org.ecnu.ryuou.pager.MusicPager;
 import org.ecnu.ryuou.pager.VideoPager;
+import org.ecnu.ryuou.util.ActivityController;
 
 public class MainActivity extends BaseActivity {
 
@@ -75,7 +76,6 @@ public class MainActivity extends BaseActivity {
 //    rg_bottom_tag.check(R.id.rb_video);
     position = 0;
     setFragment();
-
 
     // permission request
     if (ContextCompat
@@ -191,7 +191,12 @@ public class MainActivity extends BaseActivity {
     return super.onOptionsItemSelected(item);
   }
 
-//  class MyOnCheckedChangeListener implements RadioGroup.OnCheckedChangeListener {
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    ActivityController.finishAll();
+  }
+  //  class MyOnCheckedChangeListener implements RadioGroup.OnCheckedChangeListener {
 //
 //    @Override
 //    public void onCheckedChanged(RadioGroup group, int checkedId) {
