@@ -37,13 +37,6 @@ public class MainActivity extends BaseActivity {
 
   private int position;
 
-  //  /**
-//   * for player test
-//   */
-//  private SurfaceView surfaceView;
-//  private SurfaceHolder surfaceHolder;
-//  private Player player;
-//  private Button btn1;//为cut按钮设定dialog监听事件
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -78,8 +71,7 @@ public class MainActivity extends BaseActivity {
     setFragment();
 
     // permission request
-    if (ContextCompat
-        .checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)
+    if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)
         != PackageManager.PERMISSION_GRANTED) {
       ActivityCompat.requestPermissions(MainActivity.this,
           new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);

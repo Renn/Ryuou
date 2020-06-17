@@ -614,14 +614,17 @@ void *play_thread(void *args) {
                               * av_q2d(player_info.format_context->streams[player_info.audio_stream_index]->time_base),
                           player_info.total_length);
     }
+
+    // 释放packet引用
+    av_packet_unref(temp.packet);
+
     //Busy wait if paused
     while (paused) {
       if (stopped) {
         break;
       }
     }
-    // 释放packet引用
-    av_packet_unref(temp.packet);
+
     if (need_seek) {
       result = av_seek_frame(player_info.format_context,
                              player_info.video_stream_index,
@@ -644,6 +647,7 @@ void *play_thread(void *args) {
       need_seek = false;
     }
   }
+
 //  LOGE("video_count=%lld,audio_count=%lld", video_count, audio_count);
 #ifndef USE_YUV
   sws_freeContext(data_convert_context);
