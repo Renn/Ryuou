@@ -29,6 +29,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.TreeMap;
@@ -43,6 +44,7 @@ import org.ecnu.ryuou.util.LogUtil;
 
 
 public class SystemVideoPlayer extends BaseActivity implements android.view.View.OnClickListener {
+
   private static final String TAG = "SystemVideoPlayer";
   private static final int FULL_SCREEN = 1;
   private static final int PROGRESS = 1;
@@ -92,7 +94,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
   private float touchRang;
   private int mVol;
 
-  private Handler handler;
+  private final MyHandler handler = new MyHandler(this);
   private PlayerCallback playerCallback;
 
   @Override
@@ -121,24 +123,6 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     screenWidth = displayMetrics.widthPixels;
     screenHeight = displayMetrics.heightPixels;
 
-    // initialize handler
-    //todo:这一块最好挪出去
-    handler = new Handler() {
-      @Override
-      public void handleMessage(@NonNull Message msg) {
-        super.handleMessage(msg);
-        if (msg.what == PROGRESS) {
-            seekbarVideo.setProgress((int) currentPosition);
-
-            LogUtil.d("Progress", String.format("current=%f,total=%f,%d", currentPosition, totalPosition, PROGRESS));
-            tvCurrentTime.setText(String.format("%.2f", currentPosition));
-            removeMessages(PROGRESS);
-            sendEmptyMessageDelayed(PROGRESS, 1000);
-
-        }
-      }
-    };
-
     // initialize player callback
     playerCallback = new PlayerCallback() {
       @Override
@@ -153,7 +137,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     };
 
     // set current volume to system volume
-    am = (AudioManager) getSystemService(AUDIO_SERVICE);
+    am = (AudioManager)getSystemService(AUDIO_SERVICE);
     if (am != null) {
       currentVoice = am.getStreamVolume(AudioManager.STREAM_MUSIC);
       maxVoice = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
@@ -240,7 +224,6 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
       text.setText(srtbean.getSrtBody());
       System.out.println(srtbean.getSrtBody());
     }
-
   }
 
   // 手势快捷键
@@ -379,7 +362,6 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
       seekbarVoice.setProgress(progress);
       currentVoice = progress;
     }
-
   }
 
   @SuppressLint("SourceLockedOrientationActivity")
@@ -448,6 +430,31 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
 
+    }
+  }
+
+  private static class MyHandler extends Handler {
+
+    private final WeakReference<SystemVideoPlayer> refActivity;
+
+    public MyHandler(SystemVideoPlayer systemVideoPlayer) {
+      refActivity = new WeakReference<SystemVideoPlayer>(systemVideoPlayer);
+    }
+
+    @Override
+    public void handleMessage(@NonNull Message msg) {
+      super.handleMessage(msg);
+      SystemVideoPlayer systemVideoPlayer = refActivity.get();
+      if (msg.what == PROGRESS) {
+        systemVideoPlayer.seekbarVideo.setProgress((int)systemVideoPlayer.currentPosition);
+
+        LogUtil.d("Progress", String.format(Locale.CHINA, "current=%f,total=%f,%d",
+                  systemVideoPlayer.currentPosition, systemVideoPlayer.totalPosition, PROGRESS));
+
+        systemVideoPlayer.tvCurrentTime.setText(String.format("%.2f", systemVideoPlayer.currentPosition));
+        removeMessages(PROGRESS);
+        sendEmptyMessageDelayed(PROGRESS, 1000);
+      }
     }
   }
 }

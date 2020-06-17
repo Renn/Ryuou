@@ -506,7 +506,7 @@ void *play_thread(void *args) {
       }
 
       result = avcodec_receive_frame(player_info.video_codec_context, temp.frame);
-      if (result < 0 && result != AVERROR_EOF) {
+      if (result < 0 && result != AVERROR(EAGAIN) && result != AVERROR_EOF) {
         LOGE("Player Error : Can not receive frame (codec step 2)");
         return NULL;
       }
@@ -571,7 +571,7 @@ void *play_thread(void *args) {
         return NULL;
       }
       result = avcodec_receive_frame(player_info.audio_codec_context, temp.frame);
-      if (result < 0 && result != AVERROR_EOF) {
+      if (result < 0 && result != AVERROR(EAGAIN) && result != AVERROR_EOF) {
         LOGE("Player Error : Can not receive frame (codec step 2)");
         return NULL;
       }
