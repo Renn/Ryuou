@@ -651,6 +651,7 @@ void *play_thread(void *args) {
   //Release allocated resources.
   env->CallVoidMethod(instance, reflection.release_audio_track_method_id);
   env->DeleteGlobalRef(instance);
+  env->DeleteGlobalRef(callback);
   delete (Arguments *) args;
   release_resources();
   jvm->DetachCurrentThread();

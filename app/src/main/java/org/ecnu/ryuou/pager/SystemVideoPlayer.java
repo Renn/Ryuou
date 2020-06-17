@@ -14,6 +14,7 @@ import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
+import android.view.SurfaceHolder.Callback;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -22,12 +23,14 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import java.io.File;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.TreeMap;
 import org.ecnu.ryuou.BaseActivity;
 import org.ecnu.ryuou.R;
@@ -35,6 +38,7 @@ import org.ecnu.ryuou.SubtitleFileReader.ParseSrt;
 import org.ecnu.ryuou.SubtitleFileReader.SRT;
 import org.ecnu.ryuou.player.Player;
 import org.ecnu.ryuou.player.PlayerController;
+import org.ecnu.ryuou.player.PlayerController.PlayerCallback;
 import org.ecnu.ryuou.util.LogUtil;
 
 
@@ -106,6 +110,17 @@ private static final String TAG = "SystemVideoPlayer";
   private float startX;
   private float touchRang;
   private int mVol;
+  private PlayerCallback playerCallback = new PlayerCallback() {
+    @Override
+    public void onProgress(double current, double total) {
+      currentPosition = current;
+      totalPosition = total;
+      seekbarVideo.setMax((int) total);
+//                      LogUtil.d("Progress", String.format("current=%f,total=%f", currentPosition, total));
+      tvDuration.setText(String.format(Locale.CHINA, "%.2f", total));
+      handler.sendEmptyMessage(PROGRESS);
+    }
+  };
 
   private void findViews() {
     surfaceView = findViewById(R.id.surface_view);
@@ -191,34 +206,15 @@ private static final String TAG = "SystemVideoPlayer";
       case R.id.btn_video_start_pause:
         if (isnotPlay) {
           btnVideoStartPause.setBackgroundResource(R.drawable.btn_pause_start_selector);
-          String videoPath = Environment.getExternalStorageDirectory().getPath()
-              + File.separator + "Download" + File.separator + "test.mp4";
-          LogUtil.d("tryPlay", videoPath);
-          isnotPlay = !isnotPlay;
-
-          player.init(videoPath, surfaceHolder.getSurface());
 //              player.start();
-          player.seekTo(currentPosition);
-          player.start(new PlayerController.PlayerCallback() {
-            @Override
-            public void onProgress(double current, double total) {
-
-              currentPosition = current;
-              totalPosition = total;
-              seekbarVideo.setMax((int) total);
-//                      LogUtil.d("Progress", String.format("current=%f,total=%f", currentPosition, total));
-              tvDuration.setText(String.format("%.2f", total));
-              handler.sendEmptyMessage(PROGRESS);
-            }
-          });
+//          player.seekTo(currentPosition);
+          player.start(playerCallback);
         }
-//        imageButton1.setVisibility(view.INVISIBLE);
-//        imageButton2.setVisibility(view.VISIBLE);
         else {
-          isnotPlay = true;
-          player.stop();
+          player.pause();
           btnVideoStartPause.setBackgroundResource(R.drawable.btn_start_pause_selector);
         }
+        isnotPlay = !isnotPlay;
         break;
       case R.id.btn_exit:
         onBackPressed();
@@ -257,7 +253,7 @@ private static final String TAG = "SystemVideoPlayer";
       case MotionEvent.ACTION_MOVE:
         float endY = event.getY();
         float distanceY = startY - endY;
-        if (startX > screenWidth / 2) {
+        if (startX > screenWidth / 2.0) {
           float delta = (distanceY / touchRang) * maxVoice;
           int voice = (int) Math.min(Math.max(mVol + delta, 0), maxVoice);
           if (delta != 0) {
@@ -351,11 +347,40 @@ private static final String TAG = "SystemVideoPlayer";
     screenWidth = displayMetrics.widthPixels;
     screenHeight = displayMetrics.heightPixels;
     am = (AudioManager) getSystemService(AUDIO_SERVICE);
-    currentVoice = am.getStreamVolume(AudioManager.STREAM_MUSIC);
-    maxVoice = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+    if (am != null) {
+      currentVoice = am.getStreamVolume(AudioManager.STREAM_MUSIC);
+      maxVoice = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+    }
     seekbarVoice.setMax(maxVoice);
     seekbarVoice.setProgress(currentVoice);
     setListener();
+
+    surfaceHolder = surfaceView.getHolder();
+    player = Player.getPlayer();
+    final Uri uri = getIntent().getData();
+    if (uri == null) {
+      Toast.makeText(this, "Intent has no data.", Toast.LENGTH_SHORT).show();
+      finish();
+    }
+    surfaceHolder.addCallback(new Callback() {
+      @Override
+      public void surfaceCreated(SurfaceHolder holder) {
+        player.init(uri.toString(), holder.getSurface());
+        player.start(playerCallback);
+        btnVideoStartPause.setBackgroundResource(R.drawable.btn_pause_start_selector);
+        isnotPlay = false;
+      }
+
+      @Override
+      public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+
+      }
+
+      @Override
+      public void surfaceDestroyed(SurfaceHolder holder) {
+
+      }
+    });
 
     //TODO:将字幕显示在activity_system_video_player的TextView，@+id/srtView
     ParseSrt test = new ParseSrt();
@@ -375,24 +400,6 @@ private static final String TAG = "SystemVideoPlayer";
 
   }
 
-  @Override
-  protected void onResume() {
-    super.onResume();
-    surfaceHolder = surfaceView.getHolder();
-    player = Player.getPlayer();
-    Uri uri = getIntent().getData();
-    if (uri != null) {
-      player.init(uri.toString(), surfaceHolder.getSurface());
-      LogUtil.d(TAG, "url=" + uri);
-      //todo: "Player Error : Can not create native window"
-//      player.start(new PlayerCallback() {
-//        @Override
-//        public void onProgress(double current, double total) {
-//
-//        }
-//      });
-    }
-  }
   //  public void tryPlay(View view) {
 //    String videoPath = Environment.getExternalStorageDirectory().getPath()
 //        + File.separator + "Download" + File.separator + "test.mp4";
