@@ -2,6 +2,7 @@ package org.ecnu.ryuou.pager;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
@@ -75,7 +76,6 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
   private Button btnVideoPre;
   private Button btnVideoStartPause;
   private Button btnVideoNext;
-  private GestureDetector detector;
 
   private boolean isnotFull;
   private int screenWidth;
@@ -89,9 +89,13 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
   private int maxVoice;
   private boolean isMute;
   private boolean isshowMediaController;
+  private String filepath;
+
+  // for gesture detector
+  private GestureDetector detector;
   private float startY;
   private float startX;
-  private float touchRang;
+  private double startPosition;
   private int mVol;
 
   private final MyHandler handler = new MyHandler(this);
@@ -130,7 +134,6 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
         currentPosition = current;
         totalPosition = total;
         seekbarVideo.setMax((int) total);
-//                      LogUtil.d("Progress", String.format("current=%f,total=%f", currentPosition, total));
         tvDuration.setText(String.format(Locale.CHINA, "%.2f", total));
         handler.sendEmptyMessage(PROGRESS);
       }
@@ -150,18 +153,28 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
 
     // initialize player
     player = Player.getPlayer();
-    final Uri uri = getIntent().getData();
+    Uri uri = getIntent().getData();
     if (uri == null) {
       Toast.makeText(this, "Intent has no data.", Toast.LENGTH_SHORT).show();
       finish();
     }
+    filepath = uri.toString();
+
+    SharedPreferences sharedPreferences = this.getSharedPreferences("play_progress", MODE_PRIVATE);
+
+    final String lastPosition = sharedPreferences.getString(filepath, "defValue");
+
+    final String pathForSH = filepath;
     surfaceHolder = surfaceView.getHolder();
     surfaceHolder.addCallback(new Callback() {
 
       @Override
       public void surfaceCreated(SurfaceHolder holder) {
-        player.init(uri.toString(), holder.getSurface());
+        player.init(pathForSH, holder.getSurface());
         player.start(playerCallback);
+        if (!"defValue".equals(lastPosition)) {
+          player.seekTo(Double.parseDouble(lastPosition));
+        }
         btnVideoStartPause.setBackgroundResource(R.drawable.btn_pause_start_selector);
         isnotPlay = false;
       }
@@ -179,11 +192,6 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
 
     // set gesture detector
     detector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
-
-      @Override
-      public void onLongPress(MotionEvent e) {
-        super.onLongPress(e);
-      }
 
       @Override
       public boolean onDoubleTap(MotionEvent e) {
@@ -226,24 +234,37 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     }
   }
 
+  @Override
+  protected void onStop() {
+    SharedPreferences sharedPreferences = getSharedPreferences("play_progress", MODE_PRIVATE);
+    SharedPreferences.Editor editor = sharedPreferences.edit();
+    editor.putString(filepath, String.valueOf(currentPosition));
+    editor.apply();
+    // editor.commit()
+    super.onStop();
+  }
+
   // 手势快捷键
+  // 如果按下手指时在屏幕右半边，并且水平移动范围不超过屏幕1/5的宽度，则调节音量
+  // 如果按下手指时在屏幕左半边，并且水平移动范围不超过屏幕1/5的宽度，则调节亮度
+  // 如果垂直移动范围不超过屏幕1/4的高度，则调节进度条
   @Override
   public boolean onTouchEvent(MotionEvent event) {
     detector.onTouchEvent(event);
-
     switch (event.getAction()) {
       case MotionEvent.ACTION_DOWN:
+        // startX/startY分别是手机横屏后点击位置与屏幕最左端/最上端的距离
         startY = event.getY();
         startX = event.getX();
+        LogUtil.d("detector down", String.valueOf(startX) + " " + String.valueOf(startY));
         mVol = am.getStreamVolume(AudioManager.STREAM_MUSIC);
-        touchRang = Math.min(screenHeight, screenWidth);
-//                handler.removeMessages(HIDE_MEDIACONTROLLER);
+        startPosition = currentPosition;
         break;
       case MotionEvent.ACTION_MOVE:
-        float endY = event.getY();
-        float distanceY = startY - endY;
+        float distanceY = startY - event.getY();
+        float distanceX = event.getX() - startX;
         if (startX > screenWidth / 2.0) {
-          float delta = (distanceY / touchRang) * maxVoice;
+          float delta = (distanceY / Math.min(screenHeight, screenWidth)) * maxVoice;
           int voice = (int) Math.min(Math.max(mVol + delta, 0), maxVoice);
           if (delta != 0) {
             isMute = false;
@@ -254,11 +275,19 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
           final double FLING_MIN_DISTANCE = 0.5;
           final double FLING_MIN_VELOCITY = 0.5;
           if (distanceY > FLING_MIN_DISTANCE && Math.abs(distanceY) > FLING_MIN_VELOCITY) {
-            setBrightness(30);
+            setBrightness(10);
           }
           if (distanceY < FLING_MIN_DISTANCE && Math.abs(distanceY) > FLING_MIN_VELOCITY) {
-            setBrightness(-30);
+            setBrightness(-10);
           }
+        }
+        if (distanceY < screenHeight / 4.0) {
+          //LogUtil.d("detector", String.valueOf(distanceX));
+          //LogUtil.d("detector", String.valueOf(seekbarVideo.getProgress()));
+          //LogUtil.d("detector", String.valueOf(seekbarVideo.getMax()));
+          //LogUtil.d("detector", String.valueOf(currentPosition + distanceX / screenHeight * totalPosition));
+          //seekbarVideo.setProgress(seekbarVideo.getProgress() + 2);
+          player.seekTo(startPosition + distanceX / Math.max(screenHeight, screenWidth) * totalPosition * 0.1);
         }
 
         break;
@@ -339,13 +368,10 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     lp.screenBrightness = lp.screenBrightness + brightness / 255.0f;
     if (lp.screenBrightness > 1) {
       lp.screenBrightness = 1;
-    } else if (lp.screenBrightness < 0.1) {
-      lp.screenBrightness = (float) 0.1;
+    } else if (lp.screenBrightness < 0) {
+      lp.screenBrightness = (float) 0;
     }
     getWindow().setAttributes(lp);
-
-//    float sb = lp.screenBrightness;
-//            brightnessTextView.setText((int) Math.ceil(sb * 100) + "%");
   }
 
   private void setListener() {
@@ -418,6 +444,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
       if (fromUser) {
         // todo:暂停的时候拖动进度条，进度条回弹回去。。但是快进功能是正常的
+        LogUtil.d("seek video",String.valueOf(progress));
         player.seekTo(progress);
       }
     }
@@ -437,7 +464,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
 
     private final WeakReference<SystemVideoPlayer> refActivity;
 
-    public MyHandler(SystemVideoPlayer systemVideoPlayer) {
+    MyHandler(SystemVideoPlayer systemVideoPlayer) {
       refActivity = new WeakReference<SystemVideoPlayer>(systemVideoPlayer);
     }
 
@@ -451,7 +478,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
         LogUtil.d("Progress", String.format(Locale.CHINA, "current=%f,total=%f,%d",
                   systemVideoPlayer.currentPosition, systemVideoPlayer.totalPosition, PROGRESS));
 
-        systemVideoPlayer.tvCurrentTime.setText(String.format("%.2f", systemVideoPlayer.currentPosition));
+        systemVideoPlayer.tvCurrentTime.setText(String.format(Locale.CHINA,"%.2f", systemVideoPlayer.currentPosition));
         removeMessages(PROGRESS);
         sendEmptyMessageDelayed(PROGRESS, 1000);
       }
