@@ -314,6 +314,7 @@ Java_org_ecnu_ryuou_player_Player_playByNative(JNIEnv *env, jobject instance, jo
     Arguments *args = new Arguments(instance, callback);
     env->GetJavaVM(&jvm);
     pthread_create(&t_play, NULL, play_thread, args);
+    pthread_join(t_play, NULL);
   }
 }
 
@@ -447,9 +448,8 @@ void playSubtitle() {
   }
 }
 
-
-
 void *play_thread(void *args) {
+  LOGE("start play");
   //Get thread-specific jnienv and instance
   JNIEnv *env = NULL;
   if (jvm != NULL) {
@@ -462,6 +462,7 @@ void *play_thread(void *args) {
 
   jobject instance = ((Arguments *) args)->instance;
   jobject callback = ((Arguments *) args)->callback;
+
   // 临时存放函数调用结果（状态）
   int result;
 
@@ -489,10 +490,6 @@ void *play_thread(void *args) {
   int skip_audio = 0;
   long long video_count = 0;
   long long audio_count = 0;
-
-//  char subtitle_filename[50] = "/storage/emulated/0/Download/test.srt";
-//  initSubtitleFilter(subtitle_filename);
-
 
   // 播放
   while (av_read_frame(player_info.format_context, temp.packet) >= 0 && !stopped) {

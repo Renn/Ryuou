@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -92,7 +93,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
   
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
-
+    LogUtil.d("video player", "on create");
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_system_video_player);
     
@@ -127,8 +128,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     // set seek bar listeners
     setListener();
 
-    // initialize player
-    player = Player.getPlayer();
+    // get file path from intent
     Uri uri = getIntent().getData();
     if (uri == null) {
       Toast.makeText(this, "Intent has no data.", Toast.LENGTH_SHORT).show();
@@ -136,39 +136,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     }
     filepath = uri.toString();
 
-    SharedPreferences sharedPreferences = this.getSharedPreferences("play_progress", MODE_PRIVATE);
-    final String lastPosition = sharedPreferences.getString(filepath, "defValue");
-
-    final String pathForSH = filepath;
-    surfaceHolder = surfaceView.getHolder();
-    surfaceHolder.addCallback(new Callback() {
-
-      @Override
-      public void surfaceCreated(SurfaceHolder holder) {
-        player.init(pathForSH, holder.getSurface());
-        player.start(playerCallback);
-        if (!"defValue".equals(lastPosition)) {
-          double lp = Double.parseDouble(lastPosition);
-          if (lp < totalPosition) {
-            player.seekTo(lp);
-          }
-        }
-        btnVideoStartPause.setBackgroundResource(R.drawable.btn_pause_start_selector);
-        isNotPlay = false;
-      }
-
-      @Override
-      public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
-      }
-
-      @Override
-      public void surfaceDestroyed(SurfaceHolder holder) {
-
-      }
-    });
-
-    // 字幕初始化
+    // init subtitle
     hasSRT = true;
     parseSrt = new ParseSrt(srtView);
     String srtPath = filepath.substring(0, filepath.lastIndexOf(".")) + ".srt";
@@ -186,6 +154,38 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
         handler.sendEmptyMessage(PROGRESS);
       }
     };
+
+// restore play progress and play
+    SharedPreferences sharedPreferences = this.getSharedPreferences("play_progress", MODE_PRIVATE);
+    final String lastPosition = sharedPreferences.getString(filepath, "defValue");
+    LogUtil.d("video player", "last position " + lastPosition);
+
+    final String pathForSH = filepath;
+    player = Player.getPlayer();
+    surfaceHolder = surfaceView.getHolder();
+    surfaceHolder.addCallback(new Callback() {
+
+      @Override
+      public void surfaceCreated(SurfaceHolder holder) {
+        player.init(pathForSH, holder.getSurface());
+        if (!"defValue".equals(lastPosition)) {
+          player.seekTo(Double.parseDouble(lastPosition));
+        }
+        player.start(playerCallback);
+        btnVideoStartPause.setBackgroundResource(R.drawable.btn_pause_start_selector);
+        isNotPlay = false;
+      }
+
+      @Override
+      public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+
+      }
+
+      @Override
+      public void surfaceDestroyed(SurfaceHolder holder) {
+
+      }
+    });
 
     // set gesture detector
     detector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
@@ -219,48 +219,17 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
 
   @Override
   protected void onStop() {
-    SharedPreferences sharedPreferences = getSharedPreferences("play_progress", MODE_PRIVATE);
-    SharedPreferences.Editor editor = sharedPreferences.edit();
-    editor.putString(filepath, String.valueOf(currentPosition));
-    editor.apply();
-    // editor.commit()
+    saveProgress();
     super.onStop();
   }
 
-  private void findViews() {
-    surfaceView = findViewById(R.id.surface_view);
-
-    tvCurrentTime = findViewById(R.id.tv_current_time);
-    tvDuration = findViewById(R.id.tv_duration);
-
-    seekbarVoice = findViewById(R.id.seekbar_voice);
-    seekbarVideo = findViewById(R.id.seekbar_video);
-
-    btnVoice = findViewById(R.id.btn_voice);
-    btnVoice.setOnClickListener(this);
-
-    btnExit = findViewById(R.id.btn_exit);
-    btnExit.setOnClickListener(this);
-
-    btnVideoStartPause = findViewById(R.id.btn_video_start_pause);
-    btnVideoStartPause.setOnClickListener(this);
-
-    btnCut = findViewById(R.id.btn_video_cut);
-    btnCut.setOnClickListener(this);
-
-    btnPin = findViewById(R.id.btn_video_pin);
-    btnPin.setOnClickListener(this);
-
-    mediaController = findViewById(R.id.md_controller);
-
-    srtView = findViewById(R.id.srtView);
-
-  }
-
-  // 手势快捷键
-  // 如果按下手指时在屏幕右半边，并且水平移动范围不超过屏幕1/5的宽度，则调节音量
-  // 如果按下手指时在屏幕左半边，并且水平移动范围不超过屏幕1/5的宽度，则调节亮度
-  // 如果垂直移动范围不超过屏幕1/4的高度，则调节进度条
+  /**
+   * If touch the right-half screen, and move no further than 1/5 of the screen width horizontally, adjust volume
+   * If touch the left-half screen, and move no further than 1/5 of the screen width vertically, adjust brightness
+   * If touch anywhere, and move no further than 1/5 of the screen height vertically, adjust video seek bar
+   * @param event: motion event
+   * @return false
+   */
   @Override
   public boolean onTouchEvent(MotionEvent event) {
     detector.onTouchEvent(event);
@@ -335,13 +304,44 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
         break;
       case R.id.btn_exit:
         onBackPressed();
+        this.finish();
         break;
       default:
         break;
     }
   }
 
-  public void setBrightness(float brightness) {
+  private void findViews() {
+    surfaceView = findViewById(R.id.surface_view);
+
+    tvCurrentTime = findViewById(R.id.tv_current_time);
+    tvDuration = findViewById(R.id.tv_duration);
+
+    seekbarVoice = findViewById(R.id.seekbar_voice);
+    seekbarVideo = findViewById(R.id.seekbar_video);
+
+    btnVoice = findViewById(R.id.btn_voice);
+    btnVoice.setOnClickListener(this);
+
+    btnExit = findViewById(R.id.btn_exit);
+    btnExit.setOnClickListener(this);
+
+    btnVideoStartPause = findViewById(R.id.btn_video_start_pause);
+    btnVideoStartPause.setOnClickListener(this);
+
+    btnCut = findViewById(R.id.btn_video_cut);
+    btnCut.setOnClickListener(this);
+
+    btnPin = findViewById(R.id.btn_video_pin);
+    btnPin.setOnClickListener(this);
+
+    mediaController = findViewById(R.id.md_controller);
+
+    srtView = findViewById(R.id.srtView);
+
+  }
+
+  private void setBrightness(float brightness) {
     LogUtil.d("touch","in set brightness");
     WindowManager.LayoutParams lp = getWindow().getAttributes();
     lp.screenBrightness = lp.screenBrightness + brightness / 255.0f;
@@ -367,6 +367,17 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
   private void setListener() {
     seekbarVideo.setOnSeekBarChangeListener(new VideoOnSeekBarChangeListener());
     seekbarVoice.setOnSeekBarChangeListener(new VoiceOnSeekBarChangeListener());
+  }
+
+  private void saveProgress() {
+    SharedPreferences sharedPreferences = getSharedPreferences("play_progress", MODE_PRIVATE);
+    SharedPreferences.Editor editor = sharedPreferences.edit();
+    if (Math.abs(totalPosition - currentPosition) < 0.1) {
+      editor.putString(filepath, "defValue");
+    } else {
+      editor.putString(filepath, String.valueOf(currentPosition));
+    }
+    editor.apply();
   }
 
   class VoiceOnSeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
@@ -395,9 +406,6 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
       if (fromUser) {
-        // todo:暂停的时候拖动进度条，进度条回弹回去。。但是快进功能是正常的
-        LogUtil.d("seek video",String.valueOf(progress));
-
         player.seekTo(progress);
       }
     }
