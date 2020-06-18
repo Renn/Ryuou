@@ -435,19 +435,21 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
       SystemVideoPlayer systemVideoPlayer = refActivity.get();
       if (msg.what == PROGRESS) {
 
-        if (!systemVideoPlayer.isNotPlay) {
-          systemVideoPlayer.seekbarVideo.setProgress((int)systemVideoPlayer.currentPosition);
-        }
+        if (systemVideoPlayer != null) {
+          if (!systemVideoPlayer.isNotPlay) {
+            systemVideoPlayer.seekbarVideo.setProgress((int) systemVideoPlayer.currentPosition);
+          }
 
-        LogUtil.d("Progress", String.format(Locale.CHINA, "current=%f,total=%f,%d",
-                  systemVideoPlayer.currentPosition, systemVideoPlayer.totalPosition, PROGRESS));
+          LogUtil.d("Progress", String.format(Locale.CHINA, "current=%f,total=%f,%d",
+              systemVideoPlayer.currentPosition, systemVideoPlayer.totalPosition, PROGRESS));
 
-        // 显示播放进度
-        systemVideoPlayer.tvCurrentTime.setText(String.format(Locale.CHINA,"%.2f", systemVideoPlayer.currentPosition));
+          // 显示播放进度
+          systemVideoPlayer.tvCurrentTime.setText(String.format(Locale.CHINA,"%.2f", systemVideoPlayer.currentPosition));
 
-        // 播放字幕
-        if (systemVideoPlayer.parseSrt != null && systemVideoPlayer.hasSRT) {
-          systemVideoPlayer.hasSRT = systemVideoPlayer.parseSrt.show(systemVideoPlayer.currentPosition);
+          // 播放字幕
+          if (systemVideoPlayer.parseSrt != null && systemVideoPlayer.hasSRT) {
+            systemVideoPlayer.hasSRT = systemVideoPlayer.parseSrt.show(systemVideoPlayer.currentPosition);
+          }
         }
 
         removeMessages(PROGRESS);

@@ -314,7 +314,7 @@ Java_org_ecnu_ryuou_player_Player_playByNative(JNIEnv *env, jobject instance, jo
     Arguments *args = new Arguments(instance, callback);
     env->GetJavaVM(&jvm);
     pthread_create(&t_play, NULL, play_thread, args);
-    pthread_join(t_play, NULL);
+
   }
 }
 
