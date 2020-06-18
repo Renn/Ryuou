@@ -22,17 +22,17 @@
       </intent-filter>
     </activity>
     <activity
-      android:name=".pager.SystemVideoPlayer"
+      android:name=".video.SystemVideoPlayer"
       android:configChanges="keyboardHidden|screenSize|orientation"
       android:launchMode="singleTask"
       android:screenOrientation="landscape"
       android:theme="@style/AppTheme.NoActionBar" />
-    <activity android:name=".menu_setting.DevolopActivity" />
-    <activity android:name=".menu_setting.CommonActivity" />
-    <activity android:name=".menu_setting.SubtitleActivity" />
-    <activity android:name=".menu_setting.MusicActivity" />
-    <activity android:name=".menu_setting.CodecActivity" />
-    <activity android:name=".menu_setting.PlayerActivity" />
+    <activity android:name=".menu.subactivity.DevolopActivity" />
+    <activity android:name=".menu.subactivity.CommonActivity" />
+    <activity android:name=".menu.subactivity.SubtitleActivity" />
+    <activity android:name=".menu.subactivity.MusicActivity" />
+    <activity android:name=".menu.subactivity.CodecActivity" />
+    <activity android:name=".menu.subactivity.PlayerActivity" />
     <activity android:name=".menu.AboutActivity" />
     <activity android:name=".menu.SetActivity" />
     <activity

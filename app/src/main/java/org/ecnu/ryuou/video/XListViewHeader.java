@@ -4,7 +4,7 @@
  * @author Maxwin
  * @description XListView's header
  */
-package org.ecnu.ryuou.pager;
+package org.ecnu.ryuou.video;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -41,10 +41,6 @@ public class XListViewHeader extends LinearLayout {
 		initView(context);
 	}
 
-	/**
-	 * @param context
-	 * @param attrs
-	 */
 	public XListViewHeader(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		initView(context);

@@ -4,7 +4,7 @@
   android:layout_height="match_parent"
   android:orientation="vertical">
   <!--todo: androidx or xlistview? choose only one-->
-    <org.ecnu.ryuou.pager.XListView
+    <org.ecnu.ryuou.video.XListView
       android:id="@+id/listview"
       android:layout_width="match_parent"
       android:layout_height="match_parent" />

@@ -1,4 +1,4 @@
-package org.ecnu.ryuou.SubtitleFileReader;
+package org.ecnu.ryuou.subtitle;
 
 import android.widget.TextView;
 
@@ -101,7 +101,10 @@ public class ParseSrt {
     }
   }
 
-  public void show(double currentPosition) {
+  public boolean show(double currentPosition) {
+    if (SRTList.isEmpty()) {
+      return false;
+    }
     if (currentPosition >= SRTList.peek().getBeginTime()) {
       srtView.setText(SRTList.peek().getSrtBody());
     }
@@ -109,7 +112,7 @@ public class ParseSrt {
       srtView.setText("");
       SRTList.poll();
     }
-
+    return true;
   }
 
 }

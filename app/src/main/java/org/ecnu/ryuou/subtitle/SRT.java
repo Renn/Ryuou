@@ -1,4 +1,4 @@
-package org.ecnu.ryuou.SubtitleFileReader;
+package org.ecnu.ryuou.subtitle;
 
 public class SRT {
 

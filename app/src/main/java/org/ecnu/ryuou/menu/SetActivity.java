@@ -8,13 +8,13 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import org.ecnu.ryuou.BaseActivity;
-import org.ecnu.ryuou.menu_setting.CodecActivity;
-import org.ecnu.ryuou.menu_setting.CommonActivity;
-import org.ecnu.ryuou.menu_setting.DevolopActivity;
-import org.ecnu.ryuou.menu_setting.MusicActivity;
-import org.ecnu.ryuou.menu_setting.PlayerActivity;
+import org.ecnu.ryuou.menu.subactivity.CodecActivity;
+import org.ecnu.ryuou.menu.subactivity.CommonActivity;
+import org.ecnu.ryuou.menu.subactivity.DevolopActivity;
+import org.ecnu.ryuou.menu.subactivity.MusicActivity;
+import org.ecnu.ryuou.menu.subactivity.PlayerActivity;
 import org.ecnu.ryuou.R;
-import org.ecnu.ryuou.menu_setting.SubtitleActivity;
+import org.ecnu.ryuou.menu.subactivity.SubtitleActivity;
 
 public class SetActivity extends BaseActivity {
     private String[] data = {"播放器", "解码器", "音频", "字幕", "常规", "开发"};

@@ -5,7 +5,7 @@
     android:id="@+id/字幕界面"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".menu_setting.SubtitleActivity">
+    tools:context=".menu.subactivity.SubtitleActivity">
 
     <TextView
         android:id="@+id/textView"

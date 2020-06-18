@@ -5,7 +5,7 @@
     android:id="@+id/解码器界面"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".menu_setting.PlayerActivity">
+    tools:context=".menu.subactivity.PlayerActivity">
 
     <TextView
         android:id="@+id/textView2"

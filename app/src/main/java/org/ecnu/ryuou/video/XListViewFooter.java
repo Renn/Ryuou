@@ -4,7 +4,7 @@
  * @author Maxwin
  * @description XListView's footer
  */
-package org.ecnu.ryuou.pager;
+package org.ecnu.ryuou.video;
 
 import android.content.Context;
 import android.util.AttributeSet;

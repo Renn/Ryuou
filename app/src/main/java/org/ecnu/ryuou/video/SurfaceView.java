@@ -1,4 +1,4 @@
-package org.ecnu.ryuou.pager;
+package org.ecnu.ryuou.video;
 
 
 import android.content.Context;

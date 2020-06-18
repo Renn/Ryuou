@@ -52,7 +52,6 @@
     <string name="xlistview_header_last_time">上次更新时间：</string>
     <string name="xlistview_footer_hint_normal">查看更多</string>
     <string name="xlistview_footer_hint_ready">松开载入更多</string>
-    <string name="subtitle">字幕显示</string>
     <string name="input_prefill" />
     <string name="start_time">开始时间(单位s）</string>
     <string name="End_time">结束时间(单位s）</string>

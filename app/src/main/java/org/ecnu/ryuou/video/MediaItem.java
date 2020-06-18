@@ -1,4 +1,4 @@
-package org.ecnu.ryuou.domain;
+package org.ecnu.ryuou.video;
 
 import java.util.Locale;
 

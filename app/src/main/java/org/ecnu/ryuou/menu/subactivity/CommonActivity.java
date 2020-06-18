@@ -1,6 +1,4 @@
-package org.ecnu.ryuou.menu_setting;
-
-import androidx.appcompat.app.AppCompatActivity;
+package org.ecnu.ryuou.menu.subactivity;
 
 import android.os.Bundle;
 

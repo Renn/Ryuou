@@ -26,59 +26,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_weight="1">
-    <!--    <SurfaceView-->
-    <!--      android:id="@+id/surface_view"-->
-    <!--      android:layout_width="match_parent"-->
-    <!--      android:layout_height="250dp" />-->
 
-    <!--    <Button-->
-    <!--      android:layout_width="208dp"-->
-    <!--      android:layout_height="wrap_content"-->
-    <!--      android:onClick="tryPlay"-->
-    <!--      android:text="Play" />-->
-
-    <!--    <Button-->
-    <!--      android:layout_width="197dp"-->
-    <!--      android:layout_height="wrap_content"-->
-    <!--      android:layout_gravity="right"-->
-    <!--      android:onClick="tryStop"-->
-    <!--      android:text="STOP" />-->
-
-    <!--    <Button-->
-    <!--        android:id="@+id/cut"-->
-    <!--        android:layout_width="197dp"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_gravity="bottom"-->
-    <!--        android:onClick="tryCut"-->
-    <!--        android:text="CUT" />-->
   </FrameLayout>
-
-  <!--  <RadioGroup-->
-  <!--    android:id="@+id/rg_bottom_tag"-->
-  <!--    android:layout_width="match_parent"-->
-  <!--    android:layout_height="wrap_content"-->
-  <!--    android:layout_gravity="center_vertical"-->
-  <!--    android:background="@color/colorAccent"-->
-  <!--    android:orientation="horizontal"-->
-  <!--    android:padding="4dp">-->
-
-  <!--    <RadioButton-->
-  <!--      android:id="@+id/rb_video"-->
-  <!--      style="@style/bottom_tag_style"-->
-  <!--      android:drawableTop="@drawable/rb_video_drawable_selector"-->
-  <!--      android:text="@string/main_video" />-->
-  <!--    <RadioButton-->
-  <!--      android:id="@+id/rb_music"-->
-  <!--      style="@style/bottom_tag_style"-->
-  <!--      android:drawableTop="@drawable/rb_music_drawable_selector"-->
-  <!--      android:text="截取視頻" />-->
-  <!--    <RadioButton-->
-  <!--      android:id="@+id/rb_image"-->
-  <!--      style="@style/bottom_tag_style"-->
-  <!--      android:drawableTop="@drawable/rb_vimage_drawable_selector"-->
-  <!--      android:text="历史播放" />-->
-
-  <!--  </RadioGroup>-->
-
 
 </LinearLayout>

@@ -43,10 +43,6 @@
         android:minHeight="6dp"
         android:progress="0" />
 
-      <!--            <Button-->
-      <!--                android:layout_width="wrap_content"-->
-      <!--                android:layout_height="wrap_content"/>-->
-
     </LinearLayout>
 
   </LinearLayout>
@@ -91,10 +87,6 @@
         android:text="@string/undefined"
         android:textColor="#fff" />
 
-      <!--            <Button-->
-      <!--                android:layout_width="wrap_content"-->
-      <!--                android:layout_height="wrap_content"/>-->
-
     </LinearLayout>
 
     <RelativeLayout
@@ -104,16 +96,6 @@
       android:gravity="center_vertical"
       android:orientation="horizontal">
 
-      <!--      <Button-->
-      <!--        android:id="@+id/btn_video_pre"-->
-      <!--        android:layout_width="25dp"-->
-      <!--        android:layout_height="25dp"-->
-      <!--        android:layout_alignParentBottom="true"-->
-      <!--        android:layout_centerHorizontal="true"-->
-      <!--        android:layout_marginBottom="11dp"-->
-      <!--        android:layout_toLeftOf="@+id/btn_video_start_pause"-->
-      <!--        android:background="@drawable/jz_forward_icon" />-->
-
       <Button
         android:id="@+id/btn_video_start_pause"
         android:layout_width="60dp"
@@ -122,15 +104,24 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:background="@drawable/btn_start_pause_selector" />
-      <!--      <Button-->
-      <!--        android:id="@+id/btn_video_next"-->
-      <!--        android:layout_width="25dp"-->
-      <!--        android:layout_height="25dp"-->
-      <!--        android:layout_centerHorizontal="true"-->
-      <!--        android:layout_centerVertical="true"-->
-      <!--        android:layout_marginEnd="70dp"-->
-      <!--        android:layout_toRightOf="@+id/btn_video_start_pause"-->
-      <!--        android:background="@drawable/jz_forward_icon" />-->
+
+      <Button
+          android:id="@+id/btn_video_pin"
+          android:layout_width="60dp"
+          android:layout_height="60dp"
+          android:layout_centerVertical="true"
+          android:background="@color/black"
+          android:textColor="@color/white"
+          android:text="PIN"/>
+
+      <Button
+          android:id="@+id/btn_video_cut"
+          android:layout_width="60dp"
+          android:layout_height="60dp"
+          android:layout_toRightOf="@+id/btn_video_pin"
+          android:background="@color/black"
+          android:textColor="@color/white"
+          android:text="CUT" />
 
     </RelativeLayout>
 

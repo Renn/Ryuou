@@ -14,7 +14,7 @@ public class ReplaceFragment extends Fragment {
     private BasePager currPager;
 
     public ReplaceFragment(BasePager pager) {
-        this.currPager=pager;
+        this.currPager = pager;
     }
 
     public ReplaceFragment() {
@@ -23,13 +23,11 @@ public class ReplaceFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return currPager.rootView;
     }
 }

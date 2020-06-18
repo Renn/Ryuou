@@ -1,4 +1,4 @@
-package org.ecnu.ryuou.pager;
+package org.ecnu.ryuou.video;
 
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
@@ -23,20 +23,22 @@ import java.util.ArrayList;
 import java.util.Date;
 import org.ecnu.ryuou.R;
 import org.ecnu.ryuou.base.BasePager;
-import org.ecnu.ryuou.domain.MediaItem;
 import org.ecnu.ryuou.util.LogUtil;
-//import org.ecnu.ryuou.player.Player;
 
 public class VideoPager extends BasePager {
 
   private static final String TAG = "VideoPager";
-  private XListView listview;
-  private TextView tv_nomedia;
-  private ProgressBar pb_loading;
-  private SwipeRefreshLayout swipeLayout;
 
-  private VideoPagerAdapter videoPagerAdapter;
+  /* list of all available videos */
+  private XListView listView;
   private ArrayList<MediaItem> mediaItems;
+  private VideoPagerAdapter videoPagerAdapter;
+
+  /* tip in case no video available */
+  private TextView tvNomedia;
+
+  private ProgressBar pbLoading;
+
   @SuppressLint("HandlerLeak")
   private Handler handler = new Handler() {
     @Override
@@ -45,13 +47,13 @@ public class VideoPager extends BasePager {
       if (mediaItems != null && mediaItems.size() > 0) {
         videoPagerAdapter = new VideoPagerAdapter(context, mediaItems);
 
-        listview.setAdapter(videoPagerAdapter);
+        listView.setAdapter(videoPagerAdapter);
         onLoad();
-        tv_nomedia.setVisibility(View.GONE);
+        tvNomedia.setVisibility(View.GONE);
       } else {
-        tv_nomedia.setVisibility(View.VISIBLE);
+        tvNomedia.setVisibility(View.VISIBLE);
       }
-      pb_loading.setVisibility(View.GONE);
+      pbLoading.setVisibility(View.GONE);
     }
   };
 
@@ -59,31 +61,30 @@ public class VideoPager extends BasePager {
     super(context);
   }
 
-  //  time
-  public String getSystemTime() {
+  private String getSystemTime() {
     SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
     return format.format(new Date());
   }
 
-
   @Override
   public View initView() {
     View view = View.inflate(context, R.layout.video_pager, null);
-    listview = view.findViewById(R.id.listview);
+    listView = view.findViewById(R.id.listview);
 
-    tv_nomedia = view.findViewById(R.id.tv_nomedia);
-    pb_loading = view.findViewById(R.id.pb_loading);
-//        设置item点击事件
-    listview.setOnItemClickListener(new MyOnItemClickListener());
-    listview.setPullLoadEnable(false);
-    listview.setXListViewListener(new myIXListViewListener());
+    tvNomedia = view.findViewById(R.id.tv_nomedia);
+    pbLoading = view.findViewById(R.id.pb_loading);
+
+    listView.setOnItemClickListener(new MyOnItemClickListener());
+    listView.setPullLoadEnable(false);
+    listView.setXListViewListener(new myIXListViewListener());
+
     return view;
   }
 
   private void onLoad() {
-    listview.stopRefresh();
-    listview.stopLoadMore();
-    listview.setRefreshTime("更新时间：" + getSystemTime());
+    listView.stopRefresh();
+    listView.stopLoadMore();
+    listView.setRefreshTime("更新时间：" + getSystemTime());
   }
 
   @Override
@@ -208,13 +209,11 @@ class VideoPagerAdapter extends BaseAdapter {
     MediaItem mediaItem = mediaItems.get(position);
     viewHolder.tv_name.setText(mediaItem.getName());
     viewHolder.tv_time.setText(mediaItem.getFormattedDuration());
-//        viewHolder.tv_size.setText((int) mediaItem.getDuration());
     viewHolder.tv_size.setText(Formatter.formatFileSize(context, mediaItem.getSize()));
     return convertView;
   }
 
   class ViewHolder {
-
     ImageView iv_icon;
     TextView tv_name;
     TextView tv_time;

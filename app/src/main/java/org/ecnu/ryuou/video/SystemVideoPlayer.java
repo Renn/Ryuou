@@ -1,14 +1,11 @@
-package org.ecnu.ryuou.pager;
+package org.ecnu.ryuou.video;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.DisplayMetrics;
@@ -19,8 +16,6 @@ import android.view.SurfaceHolder.Callback;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -29,20 +24,17 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import java.io.File;
+
 import java.lang.ref.WeakReference;
-import java.util.Iterator;
 import java.util.Locale;
-import java.util.TreeMap;
+
 import org.ecnu.ryuou.BaseActivity;
 import org.ecnu.ryuou.R;
-import org.ecnu.ryuou.SubtitleFileReader.ParseSrt;
-import org.ecnu.ryuou.SubtitleFileReader.SRT;
+import org.ecnu.ryuou.subtitle.ParseSrt;
+import org.ecnu.ryuou.editor.Editor;
 import org.ecnu.ryuou.player.Player;
-import org.ecnu.ryuou.player.PlayerController;
 import org.ecnu.ryuou.player.PlayerController.PlayerCallback;
 import org.ecnu.ryuou.util.LogUtil;
-
 
 public class SystemVideoPlayer extends BaseActivity implements android.view.View.OnClickListener {
 
@@ -56,65 +48,65 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
   /** For player */
   private SurfaceView surfaceView;
   private SurfaceHolder surfaceHolder;
+  private final MyHandler handler = new MyHandler(this);
+  private PlayerCallback playerCallback;
   private Player player;
+  private String filepath;
+  private boolean isNotPlay;
 
-  /** Other views */
-  private Button btnVoice;
-  private SeekBar seekbarVoice;
-  private LinearLayout llBottom;
-  private TextView tvCurrentTime;
+  /** For media controller */
   private RelativeLayout mediaController;
+  private SeekBar seekbarVoice;
   private SeekBar seekbarVideo;
+  private TextView tvCurrentTime;
   private TextView tvDuration;
   private Button btnExit;
   private Button btnVideoStartPause;
+  private Button btnVoice;
+  private Button btnCut;
+  private Button btnPin;
   private TextView srtView;
-
-  private boolean isnotFull;
-  private int screenWidth;
-  private int screenHeight;
-  private boolean isnotPlay;
-  private double currentPosition;
-  private double stop;
-  private double totalPosition;
-  private AudioManager am;
+  private double startCutPosition;
   private int currentVoice;
   private int maxVoice;
   private boolean isMute;
-  private boolean isshowMediaController;
-  private String filepath;
-
-  // for gesture detector
+  private boolean isShowMediaController;
+  
+  /* For basic information */
+  private int screenWidth;
+  private int screenHeight;
+  private double currentPosition;
+  private double totalPosition;
+  
+  /* for gesture detector */
   private GestureDetector detector;
   private float startY;
   private float startX;
   private double startPosition;
   private int mVol;
+  private AudioManager am;
 
-  // for subtitle
+  /* for subtitle */
   private ParseSrt parseSrt;
-
-  private final MyHandler handler = new MyHandler(this);
-  private PlayerCallback playerCallback;
-
+  boolean hasSRT;
+  
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
 
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_system_video_player);
-
-    isnotFull = true;
-    isnotPlay = true;
+    
+    isNotPlay = true;
     isMute = false;
-    isshowMediaController = true;
+    isShowMediaController = true;
 
     findViews();
 
     // 申请权限
-    if (ContextCompat.checkSelfPermission(SystemVideoPlayer.this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                                          != PackageManager.PERMISSION_GRANTED) {
+    if (ContextCompat.checkSelfPermission(SystemVideoPlayer.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        != PackageManager.PERMISSION_GRANTED) {
       ActivityCompat.requestPermissions(SystemVideoPlayer.this,
-                                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+          new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
     }
 
     // get window size
@@ -156,10 +148,13 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
         player.init(pathForSH, holder.getSurface());
         player.start(playerCallback);
         if (!"defValue".equals(lastPosition)) {
-          player.seekTo(Double.parseDouble(lastPosition));
+          double lp = Double.parseDouble(lastPosition);
+          if (lp < totalPosition) {
+            player.seekTo(lp);
+          }
         }
         btnVideoStartPause.setBackgroundResource(R.drawable.btn_pause_start_selector);
-        isnotPlay = false;
+        isNotPlay = false;
       }
 
       @Override
@@ -174,6 +169,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     });
 
     // 字幕初始化
+    hasSRT = true;
     parseSrt = new ParseSrt(srtView);
     String srtPath = filepath.substring(0, filepath.lastIndexOf(".")) + ".srt";
     LogUtil.d("srtfilepath", srtPath);
@@ -196,25 +192,25 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
 
       @Override
       public boolean onDoubleTap(MotionEvent e) {
-        if (isnotPlay) {
+        if (isNotPlay) {
           btnVideoStartPause.setBackgroundResource(R.drawable.btn_pause_start_selector);
           player.start(playerCallback);
         } else {
           player.pause();
           btnVideoStartPause.setBackgroundResource(R.drawable.btn_start_pause_selector);
         }
-        isnotPlay = !isnotPlay;
+        isNotPlay = !isNotPlay;
         return false;
       }
 
       @Override
       public boolean onSingleTapConfirmed(MotionEvent e) {
-        if (isshowMediaController) {
+        if (isShowMediaController) {
           mediaController.setVisibility(View.GONE);
         } else {
           mediaController.setVisibility(View.VISIBLE);
         }
-        isshowMediaController = !isshowMediaController;
+        isShowMediaController = !isShowMediaController;
         return false;
       }
     });
@@ -229,6 +225,36 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     editor.apply();
     // editor.commit()
     super.onStop();
+  }
+
+  private void findViews() {
+    surfaceView = findViewById(R.id.surface_view);
+
+    tvCurrentTime = findViewById(R.id.tv_current_time);
+    tvDuration = findViewById(R.id.tv_duration);
+
+    seekbarVoice = findViewById(R.id.seekbar_voice);
+    seekbarVideo = findViewById(R.id.seekbar_video);
+
+    btnVoice = findViewById(R.id.btn_voice);
+    btnVoice.setOnClickListener(this);
+
+    btnExit = findViewById(R.id.btn_exit);
+    btnExit.setOnClickListener(this);
+
+    btnVideoStartPause = findViewById(R.id.btn_video_start_pause);
+    btnVideoStartPause.setOnClickListener(this);
+
+    btnCut = findViewById(R.id.btn_video_cut);
+    btnCut.setOnClickListener(this);
+
+    btnPin = findViewById(R.id.btn_video_pin);
+    btnPin.setOnClickListener(this);
+
+    mediaController = findViewById(R.id.md_controller);
+
+    srtView = findViewById(R.id.srtView);
+
   }
 
   // 手势快捷键
@@ -285,7 +311,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
         updateVoice(currentVoice, isMute);
         break;
       case R.id.btn_video_start_pause:
-        if (isnotPlay) {
+        if (isNotPlay) {
           player.start(playerCallback);
           btnVideoStartPause.setBackgroundResource(R.drawable.btn_pause_start_selector);
         }
@@ -293,7 +319,19 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
           player.pause();
           btnVideoStartPause.setBackgroundResource(R.drawable.btn_start_pause_selector);
         }
-        isnotPlay = !isnotPlay;
+        isNotPlay = !isNotPlay;
+        break;
+      case R.id.btn_video_pin:
+        startCutPosition = currentPosition;
+        break;
+      case R.id.btn_video_cut:
+        Editor editor = Editor.getEditor();
+        if (startCutPosition > currentPosition) {
+          double temp = startCutPosition;
+          startCutPosition = currentPosition;
+          currentPosition = temp;
+        }
+        editor.cut(filepath, startCutPosition, currentPosition);
         break;
       case R.id.btn_exit:
         onBackPressed();
@@ -301,31 +339,6 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
       default:
         break;
     }
-  }
-
-  private void findViews() {
-    surfaceView = findViewById(R.id.surface_view);
-    llBottom = findViewById(R.id.ll_bottom);
-
-    tvCurrentTime = findViewById(R.id.tv_current_time);
-    tvDuration = findViewById(R.id.tv_duration);
-
-    seekbarVoice = findViewById(R.id.seekbar_voice);
-    seekbarVideo = findViewById(R.id.seekbar_video);
-
-    btnVoice = findViewById(R.id.btn_voice);
-    btnVoice.setOnClickListener(this);
-
-    btnExit = findViewById(R.id.btn_exit);
-    btnExit.setOnClickListener(this);
-
-    btnVideoStartPause = findViewById(R.id.btn_video_start_pause);
-    btnVideoStartPause.setOnClickListener(this);
-
-    mediaController = findViewById(R.id.md_controller);
-
-    srtView = findViewById(R.id.srtView);
-
   }
 
   public void setBrightness(float brightness) {
@@ -340,11 +353,6 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     getWindow().setAttributes(lp);
   }
 
-  private void setListener() {
-    seekbarVideo.setOnSeekBarChangeListener(new VideoOnSeekBarChangeListener());
-    seekbarVoice.setOnSeekBarChangeListener(new VoiceOnSeekBarChangeListener());
-  }
-
   private void updateVoice(int progress, boolean isMute) {
     if (isMute) {
       am.setStreamVolume(AudioManager.STREAM_MUSIC, 0, 0);
@@ -354,6 +362,11 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
       seekbarVoice.setProgress(progress);
       currentVoice = progress;
     }
+  }
+
+  private void setListener() {
+    seekbarVideo.setOnSeekBarChangeListener(new VideoOnSeekBarChangeListener());
+    seekbarVoice.setOnSeekBarChangeListener(new VoiceOnSeekBarChangeListener());
   }
 
   class VoiceOnSeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
@@ -384,6 +397,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
       if (fromUser) {
         // todo:暂停的时候拖动进度条，进度条回弹回去。。但是快进功能是正常的
         LogUtil.d("seek video",String.valueOf(progress));
+
         player.seekTo(progress);
       }
     }
@@ -412,7 +426,10 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
       super.handleMessage(msg);
       SystemVideoPlayer systemVideoPlayer = refActivity.get();
       if (msg.what == PROGRESS) {
-        systemVideoPlayer.seekbarVideo.setProgress((int)systemVideoPlayer.currentPosition);
+
+        if (!systemVideoPlayer.isNotPlay) {
+          systemVideoPlayer.seekbarVideo.setProgress((int)systemVideoPlayer.currentPosition);
+        }
 
         LogUtil.d("Progress", String.format(Locale.CHINA, "current=%f,total=%f,%d",
                   systemVideoPlayer.currentPosition, systemVideoPlayer.totalPosition, PROGRESS));
@@ -421,8 +438,8 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
         systemVideoPlayer.tvCurrentTime.setText(String.format(Locale.CHINA,"%.2f", systemVideoPlayer.currentPosition));
 
         // 播放字幕
-        if (systemVideoPlayer.parseSrt != null) {
-          systemVideoPlayer.parseSrt.show(systemVideoPlayer.currentPosition);
+        if (systemVideoPlayer.parseSrt != null && systemVideoPlayer.hasSRT) {
+          systemVideoPlayer.hasSRT = systemVideoPlayer.parseSrt.show(systemVideoPlayer.currentPosition);
         }
 
         removeMessages(PROGRESS);
