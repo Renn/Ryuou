@@ -3,6 +3,7 @@ package org.ecnu.ryuou.editor;
 public class Editor implements EditorInterface {
 
   private static Editor editor = null;
+  private String outfile;
 
   static {
     System.loadLibrary("editor");
@@ -18,11 +19,15 @@ public class Editor implements EditorInterface {
     return editor;
   }
 
+  public String getOutfile() {
+    return this.outfile;
+  }
+
   @Override
   public ErrorCode cut(String file, double start, double dest) {
-    cutByNative(file, start, dest);
+    outfile = cutByNative(file, start, dest);
     return ErrorCode.SUCCESS;
   }
 
-  private native void cutByNative(String file, double start, double dest);
+  private native String cutByNative(String file, double start, double dest);
 }

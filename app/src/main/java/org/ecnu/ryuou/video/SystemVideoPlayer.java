@@ -36,6 +36,7 @@ import org.ecnu.ryuou.editor.Editor;
 import org.ecnu.ryuou.player.Player;
 import org.ecnu.ryuou.player.PlayerController.PlayerCallback;
 import org.ecnu.ryuou.util.LogUtil;
+import org.ecnu.ryuou.util.MediaScanner;
 
 public class SystemVideoPlayer extends BaseActivity implements android.view.View.OnClickListener {
 
@@ -291,9 +292,11 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
         isNotPlay = !isNotPlay;
         break;
       case R.id.btn_video_pin:
+        LogUtil.d("cut video", "pin " + currentPosition);
         startCutPosition = currentPosition;
         break;
       case R.id.btn_video_cut:
+        LogUtil.d("cut video", "cut " + currentPosition);
         Editor editor = Editor.getEditor();
         if (startCutPosition > currentPosition) {
           double temp = startCutPosition;
@@ -301,6 +304,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
           currentPosition = temp;
         }
         editor.cut(filepath, startCutPosition, currentPosition);
+        String outfile = editor.getOutfile();
         break;
       case R.id.btn_exit:
         onBackPressed();

@@ -16,7 +16,7 @@ extern "C" {
 }
 
 extern "C"
-JNIEXPORT void JNICALL
+JNIEXPORT jstring JNICALL
 Java_org_ecnu_ryuou_editor_Editor_cutByNative(JNIEnv *env,
                                               jobject thiz,
                                               jstring path_,
@@ -46,18 +46,20 @@ Java_org_ecnu_ryuou_editor_Editor_cutByNative(JNIEnv *env,
           cur_time_ptr->tm_min,
           cur_time_ptr->tm_sec);
 
+  jstring return_value = env->NewStringUTF(out_filename);
+
   in_format_context = avformat_alloc_context();
 
 // initialize input and output context
   result = avformat_open_input(&in_format_context, in_filename, 0, 0);
   if (result < 0) {
     LOGE("Editor Error : Failed to open input");
-    return;
+    return return_value;
   }
   result = avformat_alloc_output_context2(&out_format_context, NULL, NULL, out_filename);
   if (result < 0) {
     LOGE("Editor Error : Failed to create output context");
-    return;
+    return return_value;
   }
   output_format = out_format_context->oformat;
 
@@ -67,7 +69,7 @@ Java_org_ecnu_ryuou_editor_Editor_cutByNative(JNIEnv *env,
     AVStream *out_stream = avformat_new_stream(out_format_context, NULL);
     if (!out_stream) {
       LOGE("Editor Error : Failed to allocate output stream");
-      return;
+      return return_value;
     }
     avcodec_parameters_copy(out_stream->codecpar, in_stream->codecpar);
     out_stream->codecpar->codec_tag = 0;
@@ -78,14 +80,14 @@ Java_org_ecnu_ryuou_editor_Editor_cutByNative(JNIEnv *env,
     result = avio_open(&out_format_context->pb, out_filename, AVIO_FLAG_WRITE);
     if (result < 0) {
       LOGE("Editor Error: Cannot open url");
-      return;
+      return return_value;
     }
   }
 
   result = avformat_write_header(out_format_context, NULL);
   if (result < 0) {
     LOGE("Editor Error : Failed to open file");
-    return;
+    return return_value;
   }
 
 // seek to start point in both audio and video streams
@@ -95,7 +97,7 @@ Java_org_ecnu_ryuou_editor_Editor_cutByNative(JNIEnv *env,
                          AVSEEK_FLAG_ANY);
   if (result < 0) {
     LOGE("Editor Error : Failed to seek start point in stream[0]");
-    return;
+    return return_value;
   }
   result = av_seek_frame(in_format_context,
                          1,
@@ -103,7 +105,7 @@ Java_org_ecnu_ryuou_editor_Editor_cutByNative(JNIEnv *env,
                          AVSEEK_FLAG_ANY);
   if (result < 0) {
     LOGE("Editor Error : Failed to seek start point in stream[1]");
-    return;
+    return return_value;
   }
 
 // allocate dts_start_from (depression timestamp) and initialize it to 0's
@@ -186,4 +188,5 @@ Java_org_ecnu_ryuou_editor_Editor_cutByNative(JNIEnv *env,
   avformat_free_context(in_format_context);
   avformat_free_context(out_format_context);
 
+  return return_value;
 }

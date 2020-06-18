@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
@@ -18,12 +19,15 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import org.ecnu.ryuou.R;
 import org.ecnu.ryuou.base.BasePager;
 import org.ecnu.ryuou.util.LogUtil;
+import org.ecnu.ryuou.util.MediaScanner;
 
 public class VideoPager extends BasePager {
 
@@ -38,6 +42,8 @@ public class VideoPager extends BasePager {
   private TextView tvNomedia;
 
   private ProgressBar pbLoading;
+
+  //private Context context;
 
   @SuppressLint("HandlerLeak")
   private Handler handler = new Handler() {
@@ -58,6 +64,8 @@ public class VideoPager extends BasePager {
 
   public VideoPager(Context context) {
     super(context);
+    //this.context = context;
+    mediaItems = new ArrayList<>();
   }
 
   private String getSystemTime() {
@@ -100,9 +108,12 @@ public class VideoPager extends BasePager {
       @Override
       public void run() {
         super.run();
-        mediaItems = new ArrayList<>();
+
+        mediaItems.clear();
+        scanNewFile();
         ContentResolver resolver = context.getContentResolver();
         Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+        LogUtil.d("videopager", "finding items " + uri.toString());
         String[] objs = {
             MediaStore.Video.Media.DISPLAY_NAME,
             MediaStore.Video.Media.DURATION,
@@ -114,7 +125,6 @@ public class VideoPager extends BasePager {
         if (cursor != null) {
           while (cursor.moveToNext()) {
             MediaItem mediaItem = new MediaItem();
-            mediaItems.add(mediaItem);
 
             String name = cursor.getString(0);
             mediaItem.setName(name);
@@ -126,22 +136,32 @@ public class VideoPager extends BasePager {
             mediaItem.setData(data);
             String artist = cursor.getString(4);
             mediaItem.setArtist(artist);
+
+            mediaItems.add(mediaItem);
           }
           cursor.close();
         }
         handler.sendEmptyMessage(0);
+        LogUtil.d("videopager", "finding items " + mediaItems.size());
       }
     }.start();
+  }
+
+  private void scanNewFile() {
+    LogUtil.d("videopager", "scanning file in vp");
+    MediaScanner ms = MediaScanner.getInstace();
+    MediaScanner.ScanFile sf = new MediaScanner.ScanFile(Environment.getExternalStorageDirectory().getPath()
+        + File.separator + "Download" + File.separator, "media/*");
+    ms.scanFile(context, sf);
   }
 
   class myIXListViewListener implements XListView.IXListViewListener {
 
     @Override
     public void onRefresh() {
-      LogUtil.d("videopager", "xlist listener on refresh");
+      LogUtil.d("videopager", "xlist listener on refresh " + mediaItems.size());
       getDataFromLocal();
       videoPagerAdapter.notifyDataSetChanged();
-
     }
 
     @Override
