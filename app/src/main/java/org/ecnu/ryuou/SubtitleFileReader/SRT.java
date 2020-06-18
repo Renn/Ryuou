@@ -1,23 +1,33 @@
 package org.ecnu.ryuou.SubtitleFileReader;
 
 public class SRT {
-    private int beginTime;
-    private int endTime;
+
+    private int id;
+    private double beginTime;
+    private double endTime;
     private String srtBody;
 
-    public int getBeginTime() {
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public double getBeginTime() {
         return beginTime;
     }
 
-    public void setBeginTime(int beginTime) {
+    public void setBeginTime(double beginTime) {
         this.beginTime = beginTime;
     }
 
-    public int getEndTime() {
+    public double getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(int endTime) {
+    public void setEndTime(double endTime) {
         this.endTime = endTime;
     }
 
@@ -28,6 +38,7 @@ public class SRT {
     public void setSrtBody(String srtBody) {
         this.srtBody = srtBody;
     }
+
     @Override
     public String toString() {
         return "" + beginTime + ":" + endTime + ":" + srtBody;

@@ -47,7 +47,6 @@ import org.ecnu.ryuou.util.LogUtil;
 public class SystemVideoPlayer extends BaseActivity implements android.view.View.OnClickListener {
 
   private static final String TAG = "SystemVideoPlayer";
-  private static final int FULL_SCREEN = 1;
   private static final int PROGRESS = 1;
 
   static {
@@ -60,10 +59,6 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
   private Player player;
 
   /** Other views */
-  private LinearLayout llTop;
-  private TextView tvName;
-  private ImageView ivBattery;
-  private TextView tvSystemTime;
   private Button btnVoice;
   private SeekBar seekbarVoice;
   private LinearLayout llBottom;
@@ -72,10 +67,8 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
   private SeekBar seekbarVideo;
   private TextView tvDuration;
   private Button btnExit;
-  private Button btnVideoSwitchScreen;
-  private Button btnVideoPre;
   private Button btnVideoStartPause;
-  private Button btnVideoNext;
+  private TextView srtView;
 
   private boolean isnotFull;
   private int screenWidth;
@@ -97,6 +90,9 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
   private float startX;
   private double startPosition;
   private int mVol;
+
+  // for subtitle
+  private ParseSrt parseSrt;
 
   private final MyHandler handler = new MyHandler(this);
   private PlayerCallback playerCallback;
@@ -127,18 +123,6 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     screenWidth = displayMetrics.widthPixels;
     screenHeight = displayMetrics.heightPixels;
 
-    // initialize player callback
-    playerCallback = new PlayerCallback() {
-      @Override
-      public void onProgress(double current, double total) {
-        currentPosition = current;
-        totalPosition = total;
-        seekbarVideo.setMax((int) total);
-        tvDuration.setText(String.format(Locale.CHINA, "%.2f", total));
-        handler.sendEmptyMessage(PROGRESS);
-      }
-    };
-
     // set current volume to system volume
     am = (AudioManager)getSystemService(AUDIO_SERVICE);
     if (am != null) {
@@ -161,7 +145,6 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     filepath = uri.toString();
 
     SharedPreferences sharedPreferences = this.getSharedPreferences("play_progress", MODE_PRIVATE);
-
     final String lastPosition = sharedPreferences.getString(filepath, "defValue");
 
     final String pathForSH = filepath;
@@ -189,6 +172,24 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
 
       }
     });
+
+    // 字幕初始化
+    parseSrt = new ParseSrt(srtView);
+    String srtPath = filepath.substring(0, filepath.lastIndexOf(".")) + ".srt";
+    LogUtil.d("srtfilepath", srtPath);
+    parseSrt.parseSrt(srtPath);
+
+    // initialize player callback
+    playerCallback = new PlayerCallback() {
+      @Override
+      public void onProgress(double current, double total) {
+        currentPosition = current;
+        totalPosition = total;
+        seekbarVideo.setMax((int) total);
+        tvDuration.setText(String.format(Locale.CHINA, "%.2f", total));
+        handler.sendEmptyMessage(PROGRESS);
+      }
+    };
 
     // set gesture detector
     detector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
@@ -218,20 +219,6 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
       }
     });
 
-    //TODO:将字幕显示在activity_system_video_player的TextView，@+id/srtView
-    ParseSrt test = new ParseSrt();
-    test.parseSrt(Environment.getExternalStorageDirectory().getPath()
-        + File.separator + "Download" + File.separator + "test.srt");
-    // test.showSRT(currentPosition);
-    TreeMap<Integer, SRT> srt_map = test.srt_map;
-    Iterator<Integer> keys = srt_map.keySet().iterator();
-    while (keys.hasNext()) {
-      TextView text = this.findViewById(R.id.srtView);
-      Integer key = keys.next();
-      SRT srtbean = srt_map.get(key);
-      text.setText(srtbean.getSrtBody());
-      System.out.println(srtbean.getSrtBody());
-    }
   }
 
   @Override
@@ -256,7 +243,6 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
         // startX/startY分别是手机横屏后点击位置与屏幕最左端/最上端的距离
         startY = event.getY();
         startX = event.getX();
-        LogUtil.d("detector down", String.valueOf(startX) + " " + String.valueOf(startY));
         mVol = am.getStreamVolume(AudioManager.STREAM_MUSIC);
         startPosition = currentPosition;
         break;
@@ -282,17 +268,9 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
           }
         }
         if (distanceY < screenHeight / 4.0) {
-          //LogUtil.d("detector", String.valueOf(distanceX));
-          //LogUtil.d("detector", String.valueOf(seekbarVideo.getProgress()));
-          //LogUtil.d("detector", String.valueOf(seekbarVideo.getMax()));
-          //LogUtil.d("detector", String.valueOf(currentPosition + distanceX / screenHeight * totalPosition));
-          //seekbarVideo.setProgress(seekbarVideo.getProgress() + 2);
           player.seekTo(startPosition + distanceX / Math.max(screenHeight, screenWidth) * totalPosition * 0.1);
         }
 
-        break;
-      case MotionEvent.ACTION_UP:
-//                handler.removeMessages(HIDE_MEDIACONTROLLER,4000);
         break;
     }
 
@@ -327,10 +305,8 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
 
   private void findViews() {
     surfaceView = findViewById(R.id.surface_view);
-    llTop = findViewById(R.id.ll_top);
     llBottom = findViewById(R.id.ll_bottom);
 
-    tvName = findViewById(R.id.tv_name);
     tvCurrentTime = findViewById(R.id.tv_current_time);
     tvDuration = findViewById(R.id.tv_duration);
 
@@ -347,18 +323,8 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     btnVideoStartPause.setOnClickListener(this);
 
     mediaController = findViewById(R.id.md_controller);
-//        ivBattery = (ImageView)findViewById( R.id.iv_battery );
-//        tvSystemTime = (TextView)findViewById( R.id.tv_system_time );
-    //    btnVideoPre = findViewById(R.id.btn_video_pre);
-//    btnVideoNext = findViewById(R.id.btn_video_next);
-//        btnVideoSwitchScreen = (Button)findViewById( R.id.btn_video_switch_screen );
 
-
-
-//    btnVideoPre.setOnClickListener(this);
-
-//    btnVideoNext.setOnClickListener(this);
-//        btnVideoSwitchScreen.setOnClickListener( this );
+    srtView = findViewById(R.id.srtView);
 
   }
 
@@ -387,33 +353,6 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
       am.setStreamVolume(AudioManager.STREAM_MUSIC, progress, 0);
       seekbarVoice.setProgress(progress);
       currentVoice = progress;
-    }
-  }
-
-  @SuppressLint("SourceLockedOrientationActivity")
-  private void setVideoType(int fullScreen) {
-    if (isnotFull) {
-      isnotFull = !isnotFull;
-      surfaceView.setVideoSize(screenWidth, screenHeight);
-      setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-      btnVideoSwitchScreen.setBackgroundResource(R.drawable.jz_enlarge);
-    } else {
-//           int mVideoWidth =110;
-//           int mvideoHeight = 50 ;
-//           int width = screenWidth;
-//           int height = screenHeight;
-//
-//           if(mvideoHeight*height<width*mvideoHeight){
-//               width=height*mVideoWidth/mvideoHeight;
-//           }
-//           else if(mVideoWidth*height>width*mvideoHeight){
-//               height = width*mvideoHeight/mVideoWidth;
-//           }
-
-//           surfaceView.setVideoSize(width,height);
-      surfaceView.setVideoSize(screenWidth, screenHeight);
-      setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-      btnVideoSwitchScreen.setBackgroundResource(R.drawable.jz_enlarge);
     }
   }
 
@@ -465,7 +404,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
     private final WeakReference<SystemVideoPlayer> refActivity;
 
     MyHandler(SystemVideoPlayer systemVideoPlayer) {
-      refActivity = new WeakReference<SystemVideoPlayer>(systemVideoPlayer);
+      refActivity = new WeakReference<>(systemVideoPlayer);
     }
 
     @Override
@@ -478,7 +417,14 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
         LogUtil.d("Progress", String.format(Locale.CHINA, "current=%f,total=%f,%d",
                   systemVideoPlayer.currentPosition, systemVideoPlayer.totalPosition, PROGRESS));
 
+        // 显示播放进度
         systemVideoPlayer.tvCurrentTime.setText(String.format(Locale.CHINA,"%.2f", systemVideoPlayer.currentPosition));
+
+        // 播放字幕
+        if (systemVideoPlayer.parseSrt != null) {
+          systemVideoPlayer.parseSrt.show(systemVideoPlayer.currentPosition);
+        }
+
         removeMessages(PROGRESS);
         sendEmptyMessageDelayed(PROGRESS, 1000);
       }
