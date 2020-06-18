@@ -46,7 +46,6 @@ public class VideoPager extends BasePager {
       super.handleMessage(msg);
       if (mediaItems != null && mediaItems.size() > 0) {
         videoPagerAdapter = new VideoPagerAdapter(context, mediaItems);
-
         listView.setAdapter(videoPagerAdapter);
         onLoad();
         tvNomedia.setVisibility(View.GONE);
@@ -82,6 +81,7 @@ public class VideoPager extends BasePager {
   }
 
   private void onLoad() {
+    LogUtil.d("videopager", "on load");
     listView.stopRefresh();
     listView.stopLoadMore();
     listView.setRefreshTime("更新时间：" + getSystemTime());
@@ -138,7 +138,9 @@ public class VideoPager extends BasePager {
 
     @Override
     public void onRefresh() {
+      LogUtil.d("videopager", "xlist listener on refresh");
       getDataFromLocal();
+      videoPagerAdapter.notifyDataSetChanged();
 
     }
 
