@@ -221,6 +221,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
   @Override
   protected void onStop() {
     saveProgress();
+    this.finish();
     super.onStop();
   }
 
@@ -263,7 +264,7 @@ public class SystemVideoPlayer extends BaseActivity implements android.view.View
             setBrightness(-10);
           }
         }
-        if (distanceY < screenHeight / 4.0) {
+        if (Math.abs(distanceX) > screenWidth / 4.0 && distanceY < screenHeight / 4.0) {
           player.seekTo(startPosition + distanceX / Math.max(screenHeight, screenWidth) * totalPosition * 0.1);
         }
 

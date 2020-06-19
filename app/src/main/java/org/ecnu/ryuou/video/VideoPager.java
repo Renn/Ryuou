@@ -98,6 +98,7 @@ public class VideoPager extends BasePager {
   @Override
   public void initData() {
     super.initData();
+    LogUtil.d("videopager", "init data");
     getDataFromLocal();
   }
 

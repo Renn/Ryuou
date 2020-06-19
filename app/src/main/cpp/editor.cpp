@@ -188,5 +188,7 @@ Java_org_ecnu_ryuou_editor_Editor_cutByNative(JNIEnv *env,
   avformat_free_context(in_format_context);
   avformat_free_context(out_format_context);
 
+  LOGE("editor finished");
+
   return return_value;
 }
