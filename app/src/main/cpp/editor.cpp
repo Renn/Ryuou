@@ -94,7 +94,7 @@ Java_org_ecnu_ryuou_editor_Editor_cutByNative(JNIEnv *env,
   result = av_seek_frame(in_format_context,
                          0,
                          (int64_t) (start / av_q2d(in_format_context->streams[0]->time_base)),
-                         AVSEEK_FLAG_ANY);
+                         AVSEEK_FLAG_FRAME);
   if (result < 0) {
     LOGE("Editor Error : Failed to seek start point in stream[0]");
     return return_value;
@@ -102,7 +102,7 @@ Java_org_ecnu_ryuou_editor_Editor_cutByNative(JNIEnv *env,
   result = av_seek_frame(in_format_context,
                          1,
                          (int64_t) (start / av_q2d(in_format_context->streams[1]->time_base)),
-                         AVSEEK_FLAG_ANY);
+                         AVSEEK_FLAG_FRAME);
   if (result < 0) {
     LOGE("Editor Error : Failed to seek start point in stream[1]");
     return return_value;
